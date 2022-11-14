@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% load static %}
+{% load crispy_forms_tags %}
+{% block content %}
+
+<h1>help</h1>
+    {% for album in albums %}
+        {% for thing in album.images %}
+            {% if forloop.counter == 3 %}
+                <img src="{{thing.url}}" height="">
+                {{album.name}}
+            {% endif %}
+        {% endfor %}
+    {% endfor %}
+{% endblock %} 

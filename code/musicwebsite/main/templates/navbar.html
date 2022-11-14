@@ -1,0 +1,36 @@
+<nav class="navbar navbar-expand-sm bg-dark">
+
+    <!-- Links -->
+    <ul class="navbar-nav">
+      <li class="nav-item">
+        <a class="nav-link" href="{% url 'main:home' %}">Home</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="#">Link 2</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="#">Link 3</a>
+      </li>
+    </ul>
+    <div class="my_custom_menu" >
+		<ul>
+            {% if user.is_authenticated %}
+			<li>
+                Welcome {{ user.username }}
+                <i class="fas fa-user-circle"></i></a>
+			</li>
+			<li>
+				<a href="{% url 'signout' %}">Sign Out <i class="fas fa-sign-out-alt"></i></a>
+			</li>
+			{% else %}
+			<li>
+				<a href="{% url 'signup' %}">Sign Up <i class="fas fa-user-plus"></i></a>
+			</li>
+			<li>
+				<a href="{% url 'signin' %}">Sign In <i class="fas fa-sign-in-alt"></i></a>
+			</li>
+			{% endif %}
+		</ul>
+		
+	</div>
+  </nav>
