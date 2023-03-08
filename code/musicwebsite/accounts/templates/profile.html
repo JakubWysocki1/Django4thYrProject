@@ -10,5 +10,11 @@
         <h2>{{user.username}}</h2>
         <p>{{user.email}}</p>
         <p>{{ user.userprofile.profile_picture.url }}</p>
+        <form method="post" enctype="multipart/form-data">
+            <p>{{ u_form | crispy }}</p>
+            <p>{{ p_form | crispy }}</p>
+            {% csrf_token %}
+            <button type="submit" class="btn btn-success">Update Account</button>
+        </form>
     </div>
 {% endblock %}
