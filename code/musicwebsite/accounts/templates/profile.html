@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% load crispy_forms_tags %}
+{% load static %}
+{% block content %}
+    <div>
+        <img id="imageprofile" src="{{ user.userprofile.profile_picture.url }}">
+        
+    </div>
+    <div>
+        <h2>{{user.username}}</h2>
+        <p>{{user.email}}</p>
+        <p>{{ user.userprofile.profile_picture.url }}</p>
+    </div>
+{% endblock %}

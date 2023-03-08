@@ -13,6 +13,7 @@ https://docs.djangoproject.com/en/4.1/ref/settings/
 from pathlib import Path
 from re import template
 from turtle import st
+import os
 
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -125,6 +126,9 @@ USE_TZ = True
 
 STATIC_URL = 'static/'
 
+
+
+
 AUTH_USER_MODEL = 'accounts.CustomUser'
 STATICFILES_DIRS = [str(BASE_DIR.joinpath('static'))]
 STATIC_ROOT = str(BASE_DIR.joinpath('staticfiles'))
@@ -132,6 +136,10 @@ STATICFILES_FINDERS = [
     "django.contrib.staticfiles.finders.FileSystemFinder",
     "django.contrib.staticfiles.finders.AppDirectoriesFinder",
 ]
+
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR,"media").replace('\\', '/')
+
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.1/ref/settings/#default-auto-field
 

@@ -20,7 +20,7 @@ def api(request):
 
     top_songsGlobalURI = 'spotify:playlist:37i9dQZEVXbMDoHDwVN2tF'
     top_songsResults = sp.playlist_tracks(top_songsGlobalURI)
-    print(top_songsResults)
+    # print(top_songsResults)
     albums = top_songsResults['items']
     
 
@@ -32,5 +32,5 @@ def api(request):
         top_songsResults = sp.next(top_songsResults)
         albums.extend(top_songsResults['items'])
     
-    print(albums[0])
-    return render(request, 'music/home.html', {'albums':albums})
+    #print(albums[0])
+    return render(request, 'home.html', {'albums':albums})

@@ -7,6 +7,7 @@ from .models import CustomUser
 from django.contrib.auth.models import Group
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth import login, authenticate, logout
+from django.contrib.auth.decorators import login_required
 
 
 def signupView(request):
@@ -43,3 +44,7 @@ def signinView(request):
 def signoutView(request):
     logout(request)
     return redirect('signin')
+
+@login_required
+def profileView(request):
+    return render(request, 'profile.html')
