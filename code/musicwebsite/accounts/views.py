@@ -8,6 +8,7 @@ from django.contrib.auth.models import Group
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth import login, authenticate, logout
 from django.contrib.auth.decorators import login_required
+from django.contrib import messages
 
 
 def signupView(request):
@@ -56,6 +57,7 @@ def profileView(request):
         if u_form.is_valid() and p_form.is_valid():
             u_form.save()
             p_form.save()
+            messages.success(request, 'Account Updated!')
             return redirect('profile')
 
     else:

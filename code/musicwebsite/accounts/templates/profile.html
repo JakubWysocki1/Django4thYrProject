@@ -2,6 +2,15 @@
 {% load crispy_forms_tags %}
 {% load static %}
 {% block content %}
+    
+    {% if messages %}
+    <div class="alert alert-success">
+        {% for message in messages %}
+        <strong{% if message.tags %} class="{{ message.tags }}">{% endif %}{{ message }}</strong>
+        {% endfor %}
+    </div>
+    {% endif %}
+    
     <div>
         <img id="imageprofile" src="{{ user.userprofile.profile_picture.url }}">
         
