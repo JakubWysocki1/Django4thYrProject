@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% load static %}
+{% load crispy_forms_tags %}
+{% block content %}
+<div id="track detail">
+    <img id="trackDetailImg" src="{{ songinfo.album.images.1.url }}" alt="{{ songinfo.name }}">
+    <div id="trackDetailInfo">
+        <h1>{{songinfo.name}}</h1>
+        <p>By {{songinfo.artists.0.name}}</p>
+    </div>
+
+</div>
+
+{% endblock %}

@@ -8,5 +8,5 @@ app_name='main'
 urlpatterns = [
     
     path('', views.api, name='home'),
-    
+    path('songs/<str:song_id>', views.song_detail, name='songdetail'),
 ]

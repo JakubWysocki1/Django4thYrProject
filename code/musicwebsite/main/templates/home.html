@@ -2,19 +2,17 @@
 {% load static %}
 {% load crispy_forms_tags %}
 {% block content %}
-
-<h1>help</h1>
+{% for track in topsongs %}
+<div id="topGlobal">
+    <img id="trackImg" src="{{ track.track.album.images.2.url }}" alt="{{track.track.name}}">
+    <div id="trackInfo">
+        <a href="{% url 'main:songdetail' song_id=track.track.id %}">
+            <p>{{ track.track.name }} by {{ track.track.artists.0.name }}</p>
+        </a>
+        
+    </div>
     
-    {% for album in albums %}
-        {{album.track}}
-        <o></o>
+</div>
 
-        <p></p>
-        <!-- {% for thing in album.images %}
-            {% if forloop.counter == 3 %}
-                <img src="{{thing.url}}" height="">
-                {{album.name}}
-            {% endif %}
-        {% endfor %} -->
-    {% endfor %}
+{% endfor %}
 {% endblock %} 

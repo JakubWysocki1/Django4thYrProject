@@ -5,23 +5,27 @@ from spotipy.oauth2 import SpotifyOAuth
 from spotipy import Spotify
 
 # Create your views here.
+def authentication():
+    sp = spotipy.Spotify(auth_manager=SpotifyOAuth(client_id="a2be13064936401992b518216aade28c",
+                                        client_secret="ef320547195a4b80b5fe92c931486723",
+                                        redirect_uri="http://localhost:1234",
+                                        scope="user-library-read"))
+    
+    return sp
 
 
 def home(request):
     return render(request, 'music/home.html')
 
 def api(request):
-    sp = spotipy.Spotify(auth_manager=SpotifyOAuth(client_id="a2be13064936401992b518216aade28c",
-                                               client_secret="ef320547195a4b80b5fe92c931486723",
-                                               redirect_uri="http://localhost:1234",
-                                               scope="user-library-read"))
+    sp = authentication()
 
 
 
     top_songsGlobalURI = 'spotify:playlist:37i9dQZEVXbMDoHDwVN2tF'
     top_songsResults = sp.playlist_tracks(top_songsGlobalURI)
     # print(top_songsResults)
-    albums = top_songsResults['items']
+    topsongs = top_songsResults['items']
     
 
     # taylor_uri = 'spotify:artist:06HL4z0CvFAxyc27GXpf02'
@@ -30,7 +34,18 @@ def api(request):
         
     while top_songsResults['next']:
         top_songsResults = sp.next(top_songsResults)
-        albums.extend(top_songsResults['items'])
+        topsongs.extend(top_songsResults['items'])
     
     #print(albums[0])
-    return render(request, 'home.html', {'albums':albums})
+    return render(request, 'home.html', {'topsongs':topsongs})
+
+def song_detail(request, song_id):
+    sp = authentication()
+
+    uri = 'spotify:track:' + song_id
+    songinfo = sp.track(uri)
+    print(songinfo)
+
+    
+    
+    return render(request, 'songdetail.html', {'songinfo': songinfo})
