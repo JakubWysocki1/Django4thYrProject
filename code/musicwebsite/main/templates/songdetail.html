@@ -2,13 +2,45 @@
 {% load static %}
 {% load crispy_forms_tags %}
 {% block content %}
-<div id="track detail">
-    <img id="trackDetailImg" src="{{ songinfo.album.images.1.url }}" alt="{{ songinfo.name }}">
-    <div id="trackDetailInfo">
-        <h1>{{songinfo.name}}</h1>
-        <p>By {{songinfo.artists.0.name}}</p>
+<div class="jumbotron">
+    <div id="track detail" class="row">
+        <div class="col-sm-5 text-lg-right">
+            <img id="trackDetailImg" src="{{ songinfo.album.images.1.url }}" alt="{{ songinfo.name }}">
+        </div>
+        <div class="col-sm-5">
+            <div id="trackDetailInfo">
+                <h1>{{songinfo.name}}</h1>
+                <p>By {{songinfo.artists.0.name}}</p>
+                <li>Popularity {{songinfo.popularity}}/100</li>
+                <li>Released: {{songinfo.album.release_date}}</li>
+            </div>
+        </div>
     </div>
-
 </div>
+<form method="post">
+    
+    {{form | crispy}}
+    {% csrf_token %}
+    <button type="submit" class="btn btn-success">Add Comment</button>
+</form>
+
+<h3>Comment(s): {{comment_count}}</h3>
+{% for comment in comments %}
+    <div class="comment">
+        <img id="imageprofile" src="{{ comment.user.userprofile.profile_picture.url }}"></a>
+        <h5>{{comment.user}}</h5>
+
+        {% if request.user == comment.user %}
+        <form method="post" action="{% url 'main:songdetail' song_id=songinfo.id %}">
+            {% csrf_token %}
+            <input type="hidden" name="deleteComment" value="{{ comment.id }}">
+            <input type="submit" value="Delete" id="deleteComment">
+        </form>
+        {% endif %}
+        <p>{{ comment.text }}</p>
+        <small>{{ comment.created_at }}</small>
+    </div>
+    <hr>
+{% endfor %}
 
 {% endblock %}

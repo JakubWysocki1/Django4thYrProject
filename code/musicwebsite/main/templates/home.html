@@ -4,6 +4,7 @@
 {% block content %}
 {% for track in topsongs %}
 <div id="topGlobal">
+    <h3 id="numbering">{{ forloop.counter }}</h3>
     <img id="trackImg" src="{{ track.track.album.images.2.url }}" alt="{{track.track.name}}">
     <div id="trackInfo">
         <a href="{% url 'main:songdetail' song_id=track.track.id %}">
