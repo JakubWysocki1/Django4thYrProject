@@ -40,5 +40,15 @@ max-height: 50px;
 #deleteComment{
     background: none;
     border: none;
+    color: rgb(230, 133, 133);
+}
+
+#editComment{
+    background: none;
+    border: none;
     color: gray;
+}
+
+.modal-title{
+    color: black;
 }

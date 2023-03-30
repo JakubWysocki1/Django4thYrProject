@@ -27,3 +27,43 @@
         </form>
     </div>
 {% endblock %}
+
+{% for comment in comments %}
+    <div class="comment">
+        <img id="imageprofile" src="{{ comment.user.userprofile.profile_picture.url }}"></a>
+        <div class="row">
+            <div class="col-sm-1">
+                <h5>{{comment.user}}</h5>
+            </div>
+            {% if comment.user == request.user %}
+                <div class="col-sm-11">
+                    {% if editForm and editForm.instance.id == comment.id %}
+                        <form method="POST" action="{% url 'main:songdetail' song_id=songinfo.id %}">
+                            {% csrf_token %}
+                            {{editForm|crispy}}
+                            <button type="submit" class="btn btn-primary">Save</button>
+                        </form>
+                    {% else %}
+                        <p>{{ comment.text }}</p>
+                        <form method="POST" action="{% url 'main:songdetail' song_id=songinfo.id %}">
+                            {% csrf_token %}
+                            <input type="hidden" name="editComment" value="{{ comment.id }}">
+                            <button type="submit" class="btn btn-link">Edit</button>
+                        </form>
+                        <form method="POST" action="{% url 'main:songdetail' song_id=songinfo.id %}">
+                            {% csrf_token %}
+                            <input type="hidden" name="deleteComment" value="{{ comment.id }}">
+                            <button type="submit" class="btn btn-link">Delete</button>
+                        </form>
+                    {% endif %}
+                </div>
+            {% else %}
+                <div class="col-sm-11">
+                    <p>{{ comment.text }}</p>
+                </div>
+            {% endif %}
+        </div>
+        <small>{{ comment.created_at }}</small>
+    </div>
+    <hr>
+{% endfor %}

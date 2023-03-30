@@ -17,30 +17,94 @@
         </div>
     </div>
 </div>
+{% if user.is_authenticated %}
 <form method="post">
-    
-    {{form | crispy}}
-    {% csrf_token %}
-    <button type="submit" class="btn btn-success">Add Comment</button>
+   
+        {{form | crispy}}
+        {% csrf_token %}
+        <button type="submit" name="addComment" class="btn btn-success">Add Comment</button>
 </form>
+{% else %}
+<h2 >Login or Signup to add comment...</h2>
 
-<h3>Comment(s): {{comment_count}}</h3>
+{% endif %}
+
+
+<h3 class="pt-2">Comment(s): {{comment_count}}</h3>
 {% for comment in comments %}
     <div class="comment">
         <img id="imageprofile" src="{{ comment.user.userprofile.profile_picture.url }}"></a>
-        <h5>{{comment.user}}</h5>
+        <div class="row">
+            <div class="col-sm-1">
+                <h5>{{comment.user}}</h5>
+                <h5>{{comment.id}}</h5>
+            </div>
+        {% if comment.user == request.user %}
+                <button type="button" class="btn btn-link" data-toggle="modal" data-target="#editComment{{comment.id}}" onclick="populateEditForm('{{comment.id}}', '{{comment.text}}')">
+                    Edit
+                </button>
+                <div class="modal fade" id="editComment{{comment.id}}" tabindex="-1" role="dialog" aria-labelledby="editCommentLabel" aria-hidden="true">
+                    <div class="modal-dialog modal-dialog-centered" role="document">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="editCommentLabel">Edit Comment</h5>
+                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                            </div>
+                            <div class="modal-body">
+                                <form id="edit-form-{{comment.id}}" method="POST" action="{% url 'main:songdetail' song_id=songinfo.id %}" id="editCommentForm{{comment.id}}">
+                                    {% csrf_token %}
+                                    {{ editform| crispy }}
+                                    <input type="hidden" name="editComment" value="{{ comment.id }}">
+                                </form>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                                <button type="submit" class="btn btn-primary" form="editCommentForm{{comment.id}}" onclick="event.preventDefault(); document.getElementById('edit-form-{{comment.id}}').submit();">Save</button>
 
-        {% if request.user == comment.user %}
-        <form method="post" action="{% url 'main:songdetail' song_id=songinfo.id %}">
-            {% csrf_token %}
-            <input type="hidden" name="deleteComment" value="{{ comment.id }}">
-            <input type="submit" value="Delete" id="deleteComment">
-        </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <button type="button" class="btn btn-link" data-toggle="modal" data-target="#deleteComment">
+                    Delete
+                </button>
+                <div class="modal fade" id="deleteComment" tabindex="-1" role="dialog" aria-labelledby="deleteCommentLabel" aria-hidden="true">
+                    <div class="modal-dialog modal-dialog-centered" role="document">
+                      <div class="modal-content">
+                        <div class="modal-header">
+                          <h5 class="modal-title" id="deleteCommentLabel">Are you sure you want to delete your comment?</h5>
+                          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                          </button>
+                        </div>
+                        <div class="modal-footer">
+                          <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                            <form method="POST" action="{% url 'main:songdetail' song_id=songinfo.id %}">
+                                {% csrf_token %}
+                                <input type="hidden" name="deleteComment" value="{{ comment.id }}">
+                                <button type="submit" class="btn btn-danger">Delete</button>
+                            </form>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+        </div>
         {% endif %}
         <p>{{ comment.text }}</p>
-        <small>{{ comment.created_at }}</small>
+        <small>Posted on {{ comment.created_at }}</small>
     </div>
     <hr>
+    
 {% endfor %}
 
+<script>
+function populateEditForm(commentId, commentText) {
+    var editForm = document.getElementById("edit-form-" + commentId);
+    var commentInput = editForm.querySelector("textarea[name='text']");
+    commentInput.value = commentText;
+}
+</script>
 {% endblock %}

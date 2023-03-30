@@ -52,25 +52,39 @@ def song_detail(request, song_id):
     uri = 'spotify:track:' + song_id
     songinfo = sp.track(uri)
 
-    if request.method == 'POST':
-        form = CommentForm(request.POST)
-        if form.is_valid():
-            comment = form.save(commit=False)
-            comment.user = request.user
-            comment.song_id = song_id
-            comment.save()
-            return redirect('main:songdetail', song_id=song_id)
-    else:
-        form = CommentForm()
- 
-    if request.method == 'POST' and 'deleteComment' in request.POST:
-        comment_id = request.POST.get('deleteComment')
-        comment = get_object_or_404(Comment, id=comment_id, user=request.user)
-        comment.delete()
-        return redirect('main:songdetail', song_id=song_id)
-
     comments = Comment.objects.filter(song_id=song_id).order_by('-created_at')
     comment_count = comments.count()
-    return render(request, 'songdetail.html', {'songinfo': songinfo, 'form': form, 'comments': comments, 'comment_count': comment_count})
-
     
+
+    if request.method == 'POST':
+        if 'addComment' in request.POST:
+            form = CommentForm(request.POST)
+            if form.is_valid():
+                comment = form.save(commit=False)
+                comment.user = request.user
+                comment.song_id = song_id
+                comment.save()
+                return redirect('main:songdetail', song_id=song_id)
+        elif 'deleteComment' in request.POST:
+            comment_id = request.POST.get('deleteComment')
+            comment = get_object_or_404(Comment, id=comment_id, user=request.user)
+            comment.delete()
+            return redirect('main:songdetail', song_id=song_id)
+        elif 'editComment' in request.POST:
+            comment_id = request.POST.get('editComment')
+            print(comment_id)
+            comment = get_object_or_404(Comment, id=comment_id, user=request.user)
+    
+            editform = CommentForm(request.POST, instance=comment)
+            if editform.is_valid():
+                editform.save()
+                return redirect('main:songdetail', song_id=song_id)
+
+
+            
+    else:
+        form = CommentForm()
+        editform = CommentForm()
+      
+
+    return render(request, 'songdetail.html', {'songinfo': songinfo, 'form': form, 'comments': comments, 'comment_count': comment_count, 'editform': editform})
