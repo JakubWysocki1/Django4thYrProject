@@ -5,7 +5,8 @@ from spotipy.oauth2 import SpotifyOAuth, SpotifyClientCredentials
 from spotipy import Spotify
 from django.shortcuts import get_object_or_404
 from .forms import CommentForm
-from .models import Comment
+from .models import Comment, Review
+from django.http import JsonResponse
 
 
 # Create your views here.
@@ -54,7 +55,8 @@ def song_detail(request, song_id):
 
     comments = Comment.objects.filter(song_id=song_id).order_by('-created_at')
     comment_count = comments.count()
-    
+
+    ratings = Review.objects.filter(song_id=song_id)
 
     if request.method == 'POST':
         if 'addComment' in request.POST:
@@ -79,8 +81,6 @@ def song_detail(request, song_id):
             if editform.is_valid():
                 editform.save()
                 return redirect('main:songdetail', song_id=song_id)
-
-
             
     else:
         form = CommentForm()
@@ -88,3 +88,35 @@ def song_detail(request, song_id):
       
 
     return render(request, 'songdetail.html', {'songinfo': songinfo, 'form': form, 'comments': comments, 'comment_count': comment_count, 'editform': editform})
+
+
+def toggle_comment_reaction(request):
+    if request.method == 'POST':
+        comment_id = request.POST.get('comment_id')
+        reaction_type = request.POST.get('reaction_type')
+        comment = get_object_or_404(Comment, id=comment_id)
+
+        if reaction_type == 'like':
+            if request.user in comment.liked_by.all():
+                comment.liked_by.remove(request.user)
+                comment.likes -= 1
+            else:
+                comment.liked_by.add(request.user)
+                comment.likes += 1
+                if request.user in comment.disliked_by.all():
+                    comment.disliked_by.remove(request.user)
+                    comment.dislikes -= 1
+        elif reaction_type == 'dislike':
+            if request.user in comment.disliked_by.all():
+                comment.disliked_by.remove(request.user)
+                comment.dislikes -= 1
+            else:
+                comment.disliked_by.add(request.user)
+                comment.dislikes += 1
+                if request.user in comment.liked_by.all():
+                    comment.liked_by.remove(request.user)
+                    comment.likes -= 1
+
+        comment.save()
+        data = {'likes': comment.likes, 'dislikes': comment.dislikes}
+        return JsonResponse(data)

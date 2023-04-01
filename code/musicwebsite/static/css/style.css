@@ -33,22 +33,21 @@ max-height: 50px;
     height: 200px;
 }
 
-#trackDetailInfo{
-
-}
-
-#deleteComment{
-    background: none;
-    border: none;
-    color: rgb(230, 133, 133);
-}
-
-#editComment{
-    background: none;
-    border: none;
-    color: gray;
-}
-
 .modal-title{
     color: black;
 }
+
+
+#editButton, #deleteButton {
+    padding: 0px;
+    padding-right: 5px;
+    padding-left: 0px;
+    margin: 0px;
+    border: 0;
+    background-color: none;
+    height: 25px;
+    line-height: 25px;
+    text-decoration: none;
+}
+
+

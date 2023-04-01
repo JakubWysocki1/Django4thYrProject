@@ -34,13 +34,24 @@
 {% for comment in comments %}
     <div class="comment">
         <img id="imageprofile" src="{{ comment.user.userprofile.profile_picture.url }}"></a>
-        <div class="row">
-            <div class="col-sm-1">
+        <div class="">
+            <div class="">
                 <h5>{{comment.user}}</h5>
-                <h5>{{comment.id}}</h5>
             </div>
-        {% if comment.user == request.user %}
-                <button type="button" class="btn btn-link" data-toggle="modal" data-target="#editComment{{comment.id}}" onclick="populateEditForm('{{comment.id}}', '{{comment.text}}')">
+            <div>
+                <div id="buttons" class="btn-group">
+                    <button id="likeButton-{{ comment.id }}" type="button" class="likeButton btn btn-link" onclick="toggleCommentReaction('{{ comment.id }}', 'like')">
+                        <i id="likeIcon-{{ comment.id }}" class="fa fa-thumbs-up" style="color:gray"></i>
+                    </button>
+                    <span id="likes-{{ comment.id }}">{{ comment.likes }}</span>
+                    <button id="dislikeButton-{{ comment.id }}" type="button" class="dislikeButton btn btn-link" onclick="toggleCommentReaction('{{ comment.id }}', 'dislike')">
+                        <i id="dislikeIcon-{{ comment.id }}" class="fa fa-thumbs-down" style="color:gray"></i>
+                    </button>
+                    <span id="dislikes-{{ comment.id }}">{{ comment.dislikes }}</span>
+                </div>
+                
+                {% if comment.user == request.user %}
+                <button id="editButton" type="button" class="btn btn-link btn-sm" data-toggle="modal" data-target="#editComment{{comment.id}}" onclick="populateEditForm('{{comment.id}}', '{{comment.text}}')">
                     Edit
                 </button>
                 <div class="modal fade" id="editComment{{comment.id}}" tabindex="-1" role="dialog" aria-labelledby="editCommentLabel" aria-hidden="true">
@@ -68,7 +79,7 @@
                     </div>
                 </div>
                 
-                <button type="button" class="btn btn-link" data-toggle="modal" data-target="#deleteComment">
+                <button id="deleteButton" type="button" class="btn btn-link btn-sm" data-toggle="modal" data-target="#deleteComment">
                     Delete
                 </button>
                 <div class="modal fade" id="deleteComment" tabindex="-1" role="dialog" aria-labelledby="deleteCommentLabel" aria-hidden="true">
@@ -91,9 +102,10 @@
                       </div>
                     </div>
                   </div>
+            </div>
         </div>
         {% endif %}
-        <p>{{ comment.text }}</p>
+        <p class="pt-2">{{ comment.text }}</p>
         <small>Posted on {{ comment.created_at }}</small>
     </div>
     <hr>
@@ -106,5 +118,51 @@ function populateEditForm(commentId, commentText) {
     var commentInput = editForm.querySelector("textarea[name='text']");
     commentInput.value = commentText;
 }
+
+function toggleCommentReaction(comment_id, reaction_type) {
+    var url = '{% url "main:toggle_comment_reaction" %}';
+
+    $.ajax({
+        url: url,
+        type: 'POST',
+        data: {
+            'comment_id': comment_id,
+            'reaction_type': reaction_type,
+            'csrfmiddlewaretoken': $('input[name=csrfmiddlewaretoken]').val()
+        },
+        success: function (response) {
+            $('#likes-' + comment_id).text(response.likes);
+            $('#dislikes-' + comment_id).text(response.dislikes);
+            // Toggle the color of the button based on the reaction type
+            if (reaction_type == 'like') {
+                if ($('#likeButton-'+ comment_id).hasClass('liked')) {
+                    $('#likeIcon-'+ comment_id).css('color', 'gray');
+                    $('#likeButton-'+ comment_id).removeClass('liked');
+                } else {
+                    $('#likeButton-'+ comment_id).addClass('liked');
+                    $('#likeIcon-'+ comment_id).css('color', 'blue');
+                    $('#dislikeButton-'+ comment_id).removeClass('disliked');
+                    $('#dislikeIcon-'+ comment_id).css('color', 'gray');
+                }
+            } else if (reaction_type == 'dislike') {
+                if ($('#dislikeButton-'+ comment_id).hasClass('disliked')) {
+                    $('#dislikeIcon-'+ comment_id).css('color', 'gray');
+                    $('#dislikeButton-'+ comment_id).removeClass('disliked');
+                } else {
+                    $('#dislikeButton-'+ comment_id).addClass('disliked');
+                    $('#dislikeIcon-'+ comment_id).css('color', 'blue');
+                    $('#likeButton-'+ comment_id).removeClass('liked');
+                    $('#likeIcon-'+ comment_id).css('color', 'gray');
+                }
+            }
+
+        },
+        error: function (xhr, status, error) {
+            console.log(xhr.responseText);
+        }
+    });
+}
+
+
 </script>
 {% endblock %}
