@@ -2,166 +2,295 @@
 {% load static %}
 {% load crispy_forms_tags %}
 {% block content %}
-<div class="jumbotron">
-    <div id="track detail" class="row">
-        <div class="col-sm-5 text-lg-right">
-            <img id="trackDetailImg" src="{{ songinfo.album.images.1.url }}" alt="{{ songinfo.name }}">
-        </div>
-        <div class="col-sm-5">
-            <div id="trackDetailInfo">
-                <h1>{{songinfo.name}}</h1>
-                <p>By {{songinfo.artists.0.name}}</p>
-                <li>Popularity {{songinfo.popularity}}/100</li>
-                <li>Released: {{songinfo.album.release_date}}</li>
+<div class="container">
+    <div class="jumbotron">
+        <div id="track detail" class="row">
+            <div class="col-sm-5 text-lg-right">
+                <img id="trackDetailImg" src="{{ songinfo.album.images.1.url }}" alt="{{ songinfo.name }}">
+            </div>
+            <div class="col-sm-5">
+                <div id="trackDetailInfo">
+                    <h1>{{songinfo.name}}</h1>
+                    <p>By {{songinfo.artists.0.name}}</p>
+                    <li>Popularity {{songinfo.popularity}}/100</li>
+                    <li>Released: {{songinfo.album.release_date}}</li>
+                </div>
             </div>
         </div>
     </div>
-</div>
-{% if user.is_authenticated %}
-<form method="post">
-   
-        {{form | crispy}}
-        {% csrf_token %}
-        <button type="submit" name="addComment" class="btn btn-success">Add Comment</button>
-</form>
-{% else %}
-<h2 >Login or Signup to add comment...</h2>
+    {% if user.is_authenticated %}
+    <form method="post">
+    
+            {{form | crispy}}
+            {% csrf_token %}
+            <button type="submit" name="addComment" class="btn btn-success">Add Comment</button>
+    </form>
+    {% else %}
+    <h2 >Login or Signup to add comment...</h2>
 
-{% endif %}
+    {% endif %}
 
 
-<h3 class="pt-2">Comment(s): {{comment_count}}</h3>
-{% for comment in comments %}
-    <div class="comment">
-        <img id="imageprofile" src="{{ comment.user.userprofile.profile_picture.url }}"></a>
-        <div class="">
+    <h3 class="pt-2">Comment(s): {{comment_count}}</h3>
+    {% for comment in comments %}
+        <div class="comment">
             <div class="">
-                <h5>{{comment.user}}</h5>
-            </div>
-            <div>
-                <div id="buttons" class="btn-group">
-                    <button id="likeButton-{{ comment.id }}" type="button" class="likeButton btn btn-link" onclick="toggleCommentReaction('{{ comment.id }}', 'like')">
-                        <i id="likeIcon-{{ comment.id }}" class="fa fa-thumbs-up" style="color:gray"></i>
-                    </button>
-                    <span id="likes-{{ comment.id }}">{{ comment.likes }}</span>
-                    <button id="dislikeButton-{{ comment.id }}" type="button" class="dislikeButton btn btn-link" onclick="toggleCommentReaction('{{ comment.id }}', 'dislike')">
-                        <i id="dislikeIcon-{{ comment.id }}" class="fa fa-thumbs-down" style="color:gray"></i>
-                    </button>
-                    <span id="dislikes-{{ comment.id }}">{{ comment.dislikes }}</span>
+                <div class="">
+                    <h5><img id="imageprofile" src="{{ comment.user.userprofile.profile_picture.url }}">
+                    <span>
+                        {{comment.user}}
+                            <span>
+                                <div id="buttons" class="btn-group">
+                                    <button id="likeButton-{{ comment.id }}" type="button" class="likeButton btn btn-link btn-sm" onclick="toggleCommentReaction('{{ comment.id }}', 'like')">
+                                        <i id="likeIcon-{{ comment.id }}" class="fa fa-thumbs-up" style="color:gray"></i>
+                                    </button>
+                                    <span class="likecount" id="likes-{{ comment.id }}">{{ comment.likes }}</span>
+                                    <button id="dislikeButton-{{ comment.id }}" type="button" class="dislikeButton btn btn-link btn-sm" onclick="toggleCommentReaction('{{ comment.id }}', 'dislike')">
+                                        <i id="dislikeIcon-{{ comment.id }}" class="fa fa-thumbs-down" style="color:gray"></i>
+                                    </button>
+                                    <span class="dislikecount" id="dislikes-{{ comment.id }}">{{ comment.dislikes }}</span>
+                                </div>
+                                {% if comment.user == request.user %}
+                                    <button id="editButton" type="button" class="btn btn-link btn-sm pl-2" data-toggle="modal" data-target="#editComment{{comment.id}}" onclick="populateEditForm('{{comment.id}}', '{{comment.text}}')">
+                                        Edit
+                                    </button>
+                                    <button id="deleteButton" type="button" class="btn btn-link btn-sm" data-toggle="modal" data-target="#deleteComment{{comment.id}}">
+                                        Delete
+                                    </button>
+                                {% endif %}
+                            </span>
+                        
+                    </span></h5>
                 </div>
+                <div class=""> 
+                    
+                    <div class="modal fade" id="editComment{{comment.id}}" tabindex="-1" role="dialog" aria-labelledby="editCommentLabel" aria-hidden="true">
+                        <div class="modal-dialog modal-dialog-centered" role="document">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="editCommentLabel">Edit Comment</h5>
+                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                        <span aria-hidden="true">&times;</span>
+                                    </button>
+                                </div>
+                                <div class="modal-body">
+                                    <form id="edit-form-{{comment.id}}" method="POST" action="{% url 'main:songdetail' song_id=songinfo.id %}" id="editCommentForm{{comment.id}}">
+                                        {% csrf_token %}
+                                        {{ editform| crispy }}
+                                        <input type="hidden" name="editComment" value="{{ comment.id }}">
+                                    </form>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                                    <button type="submit" class="btn btn-primary" form="editCommentForm{{comment.id}}" onclick="event.preventDefault(); document.getElementById('edit-form-{{comment.id}}').submit();">Save</button>
+
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 
-                {% if comment.user == request.user %}
-                <button id="editButton" type="button" class="btn btn-link btn-sm" data-toggle="modal" data-target="#editComment{{comment.id}}" onclick="populateEditForm('{{comment.id}}', '{{comment.text}}')">
-                    Edit
-                </button>
-                <div class="modal fade" id="editComment{{comment.id}}" tabindex="-1" role="dialog" aria-labelledby="editCommentLabel" aria-hidden="true">
-                    <div class="modal-dialog modal-dialog-centered" role="document">
+                    <div class="modal fade" id="deleteComment{{comment.id}}" tabindex="-1" role="dialog" aria-labelledby="deleteCommentLabel" aria-hidden="true">
+                        <div class="modal-dialog modal-dialog-centered" role="document">
                         <div class="modal-content">
                             <div class="modal-header">
-                                <h5 class="modal-title" id="editCommentLabel">Edit Comment</h5>
-                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                    <span aria-hidden="true">&times;</span>
-                                </button>
+                            <h5 class="modal-title" id="deleteCommentLabel">Are you sure you want to delete your comment?</h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
                             </div>
                             <div class="modal-body">
-                                <form id="edit-form-{{comment.id}}" method="POST" action="{% url 'main:songdetail' song_id=songinfo.id %}" id="editCommentForm{{comment.id}}">
-                                    {% csrf_token %}
-                                    {{ editform| crispy }}
-                                    <input type="hidden" name="editComment" value="{{ comment.id }}">
-                                </form>
+                                {{comment.text}}
                             </div>
                             <div class="modal-footer">
-                                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                                <button type="submit" class="btn btn-primary" form="editCommentForm{{comment.id}}" onclick="event.preventDefault(); document.getElementById('edit-form-{{comment.id}}').submit();">Save</button>
-
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                                <form method="POST" action="{% url 'main:songdetail' song_id=songinfo.id %}">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="deleteComment" value="{{ comment.id }}">
+                                    <button type="submit" class="btn btn-danger">Delete</button>
+                                </form>
                             </div>
+                        </div>
                         </div>
                     </div>
                 </div>
-                
-                <button id="deleteButton" type="button" class="btn btn-link btn-sm" data-toggle="modal" data-target="#deleteComment">
-                    Delete
-                </button>
-                <div class="modal fade" id="deleteComment" tabindex="-1" role="dialog" aria-labelledby="deleteCommentLabel" aria-hidden="true">
-                    <div class="modal-dialog modal-dialog-centered" role="document">
-                      <div class="modal-content">
-                        <div class="modal-header">
-                          <h5 class="modal-title" id="deleteCommentLabel">Are you sure you want to delete your comment?</h5>
-                          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                            <span aria-hidden="true">&times;</span>
-                          </button>
-                        </div>
-                        <div class="modal-footer">
-                          <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                            <form method="POST" action="{% url 'main:songdetail' song_id=songinfo.id %}">
-                                {% csrf_token %}
-                                <input type="hidden" name="deleteComment" value="{{ comment.id }}">
-                                <button type="submit" class="btn btn-danger">Delete</button>
-                            </form>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
             </div>
+            
+            <div id="comment content" class="pl-2">
+                <p class="pt-2">{{ comment.text }}</p>
+                <small>Posted on {{ comment.created_at }}</small>
+            </div>
+            
+            <div id="replies">
+                <button type="button" class="btn btn-link" onclick="showReplies('{{ comment.id }}')" id="show-replies-button-{{ comment.id }}">Show replies</button>
+                <span>({{ comment.replies.count }})</span>
+                {% if user.is_authenticated %}
+                    <button type="button" class="btn btn-link" data-toggle="modal" data-target="#replyComment{{ comment.id }}">
+                        Reply
+                    </button>
+
+                    <!-- Reply modal dialog -->
+                    <div class="modal fade" id="replyComment{{comment.id}}" tabindex="-1" role="dialog" aria-labelledby="replyCommentLabel" aria-hidden="true">
+                        <div class="modal-dialog modal-dialog-centered" role="document">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="replyCommentLabel">Reply Comment</h5>
+                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                        <span aria-hidden="true">&times;</span>
+                                    </button>
+                                </div>
+                                <div class="modal-body">
+                                    <form id="reply-form-{{ comment.id }}" method="POST" action="{% url 'main:songdetail' song_id=songinfo.id %}" id="replyCommentForm{{ comment.id }}">
+                                        {% csrf_token %}
+                                        {{ replyform | crispy }}
+                                        <input type="hidden" name="parent_comment_id" value="{{ comment.id }}">
+                                    </form>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                                    <button type="submit" class="btn btn-primary" form="replyCommentForm{{ comment.id }}" onclick="event.preventDefault(); document.getElementById('reply-form-{{ comment.id }}').submit();">Reply</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                {% endif %}
+            
+                <div id="replies-{{ comment.id }}" style="display:none;">
+                {% for reply in comment.replies.all %}
+                    <div id="commentreply">
+                        <div>
+                            <h5><img id="imageprofile" src="{{ reply.user.userprofile.profile_picture.url }}">
+                            <span>{{reply.user}}
+                                {% if reply.user == request.user %}
+                                <span class="pl-3">
+                                    <button id="editButton-{{reply.id}}" type="button" class="btn btn-link btn-sm" data-toggle="modal" data-target="#editReply-{{reply.id}}" onclick="populateEditForm('{{reply.id}}', '{{reply.text}}')">Edit
+                                    </button>
+                                    <button id="deleteButton-{{reply.id}}" type="button" class="btn btn-link btn-sm" data-toggle="modal" data-target="#deleteReply-{{reply.id}}">Delete
+                                    </button>
+                                </span>
+                            {% endif %}
+
+                            </span></h5>
+                        </div>
+                        <div class="modal fade" id="editReply-{{reply.id}}" tabindex="-1" role="dialog" aria-labelledby="editReplyLabel" aria-hidden="true">
+                            <div class="modal-dialog modal-dialog-centered" role="document">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title" id="editReplyLabel">Edit Reply</h5>
+                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                            <span aria-hidden="true">&times;</span>
+                                        </button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <form id="edit-form-{{reply.id}}" method="POST" action="{% url 'main:songdetail' song_id=songinfo.id %}" id="editReplyForm{{reply.id}}">
+                                            {% csrf_token %}
+                                            {{ replyform | crispy }}
+                                            <input type="hidden" name="editReply" value="{{ reply.id }}">
+                                        </form>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                                        <button type="submit" class="btn btn-primary" form="editReplyForm{{reply.id}}" onclick="event.preventDefault(); document.getElementById('edit-form-{{reply.id}}').submit();">Save</button>
+        
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="modal fade" id="deleteReply-{{reply.id}}" tabindex="-1" role="dialog" aria-labelledby="deleteReplyLabel" aria-hidden="true">
+                            <div class="modal-dialog modal-dialog-centered" role="document">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title" id="deleteReplyLabel">Are you sure you want to delete your reply?</h5>
+                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                            <span aria-hidden="true">&times;</span>
+                                        </button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <p>{{reply.text}}</p>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                                        <form method="POST" action="{% url 'main:songdetail' song_id=songinfo.id %}">
+                                            {% csrf_token %}
+                                            <input type="hidden" name="deleteReply" value="{{ reply.id }}">
+                                            <button type="submit" class="btn btn-danger">Delete</button>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <p class="pl-2">{{ reply.text }}</p>
+                    </div>
+                {% endfor %}
+            </div>     
         </div>
-        {% endif %}
-        <p class="pt-2">{{ comment.text }}</p>
-        <small>Posted on {{ comment.created_at }}</small>
-    </div>
     <hr>
-    
-{% endfor %}
-
+        
+    {% endfor %}
+</div>
 <script>
-function populateEditForm(commentId, commentText) {
-    var editForm = document.getElementById("edit-form-" + commentId);
-    var commentInput = editForm.querySelector("textarea[name='text']");
-    commentInput.value = commentText;
-}
+    function populateEditForm(commentId, commentText) {
+        var editForm = document.getElementById("edit-form-" + commentId);
+        var commentInput = editForm.querySelector("textarea[name='text']");
+        commentInput.value = commentText;
+    }
 
-function toggleCommentReaction(comment_id, reaction_type) {
-    var url = '{% url "main:toggle_comment_reaction" %}';
 
-    $.ajax({
-        url: url,
-        type: 'POST',
-        data: {
-            'comment_id': comment_id,
-            'reaction_type': reaction_type,
-            'csrfmiddlewaretoken': $('input[name=csrfmiddlewaretoken]').val()
-        },
-        success: function (response) {
-            $('#likes-' + comment_id).text(response.likes);
-            $('#dislikes-' + comment_id).text(response.dislikes);
-            // Toggle the color of the button based on the reaction type
-            if (reaction_type == 'like') {
-                if ($('#likeButton-'+ comment_id).hasClass('liked')) {
-                    $('#likeIcon-'+ comment_id).css('color', 'gray');
-                    $('#likeButton-'+ comment_id).removeClass('liked');
-                } else {
-                    $('#likeButton-'+ comment_id).addClass('liked');
-                    $('#likeIcon-'+ comment_id).css('color', 'blue');
-                    $('#dislikeButton-'+ comment_id).removeClass('disliked');
-                    $('#dislikeIcon-'+ comment_id).css('color', 'gray');
+    function toggleCommentReaction(comment_id, reaction_type) {
+        var url = '{% url "main:toggle_comment_reaction" %}';
+
+        $.ajax({
+            url: url,
+            type: 'POST',
+            data: {
+                'comment_id': comment_id,
+                'reaction_type': reaction_type,
+                'csrfmiddlewaretoken': $('input[name=csrfmiddlewaretoken]').val()
+            },
+            success: function (response) {
+                $('#likes-' + comment_id).text(response.likes);
+                $('#dislikes-' + comment_id).text(response.dislikes);
+                // Toggle the color of the button based on the reaction type
+                if (reaction_type == 'like') {
+                    if ($('#likeButton-'+ comment_id).hasClass('liked')) {
+                        $('#likeIcon-'+ comment_id).css('color', 'gray');
+                        $('#likeButton-'+ comment_id).removeClass('liked');
+                    } else {
+                        $('#likeButton-'+ comment_id).addClass('liked');
+                        $('#likeIcon-'+ comment_id).css('color', 'blue');
+                        $('#dislikeButton-'+ comment_id).removeClass('disliked');
+                        $('#dislikeIcon-'+ comment_id).css('color', 'gray');
+                    }
+                } else if (reaction_type == 'dislike') {
+                    if ($('#dislikeButton-'+ comment_id).hasClass('disliked')) {
+                        $('#dislikeIcon-'+ comment_id).css('color', 'gray');
+                        $('#dislikeButton-'+ comment_id).removeClass('disliked');
+                    } else {
+                        $('#dislikeButton-'+ comment_id).addClass('disliked');
+                        $('#dislikeIcon-'+ comment_id).css('color', 'blue');
+                        $('#likeButton-'+ comment_id).removeClass('liked');
+                        $('#likeIcon-'+ comment_id).css('color', 'gray');
+                    }
                 }
-            } else if (reaction_type == 'dislike') {
-                if ($('#dislikeButton-'+ comment_id).hasClass('disliked')) {
-                    $('#dislikeIcon-'+ comment_id).css('color', 'gray');
-                    $('#dislikeButton-'+ comment_id).removeClass('disliked');
-                } else {
-                    $('#dislikeButton-'+ comment_id).addClass('disliked');
-                    $('#dislikeIcon-'+ comment_id).css('color', 'blue');
-                    $('#likeButton-'+ comment_id).removeClass('liked');
-                    $('#likeIcon-'+ comment_id).css('color', 'gray');
-                }
+
+            },
+            error: function (xhr, status, error) {
+                console.log(xhr.responseText);
             }
+        });
+    }
 
-        },
-        error: function (xhr, status, error) {
-            console.log(xhr.responseText);
-        }
-    });
-}
+    function showReplies(commentId) {
+    var repliesDiv = document.getElementById("replies-" + commentId);
+    var button = document.getElementById("show-replies-button-" + commentId);
+
+    if (repliesDiv.style.display === "none") {
+        repliesDiv.style.display = "block";
+        button.innerHTML = "Hide replies";
+    } else {
+        repliesDiv.style.display = "none";
+        button.innerHTML = "Show replies";
+    }
+    }
 
 
 </script>

@@ -2,18 +2,68 @@
 {% load static %}
 {% load crispy_forms_tags %}
 {% block content %}
-{% for track in topsongs %}
-<div id="topGlobal">
-    <h3 id="numbering">{{ forloop.counter }}</h3>
-    <img id="trackImg" src="{{ track.track.album.images.2.url }}" alt="{{track.track.name}}">
-    <div id="trackInfo">
-        <a href="{% url 'main:songdetail' song_id=track.track.id %}">
-            <p>{{ track.track.name }} by {{ track.track.artists.0.name }}</p>
-        </a>
-        
+
+<div class="row justify-content-md-center">
+    <div id="songDiv" class="col-md-3 p-2 m-2">
+        <h1 class="pb-2">Top Global Songs</h1>
+        {% for track in topsongs %}
+            <div class="row pb-3">
+                <div class="col-md-1">
+                <h3 id="numbering">{{ forloop.counter }}</h3>
+                </div>
+                <div class="col-md-2">
+                    <img id="trackImg" src="{{ track.track.album.images.2.url }}" alt="{{track.track.name}}">
+                </div>
+                <div id="trackInfo" class="col-md">
+                    <a href="{% url 'main:songdetail' song_id=track.track.id %}">
+                    {{ track.track.name }} by {{ track.track.artists.0.name }}</a>
+                </div>
+            </div>
+        {% endfor %}
     </div>
-    
+    <div id="songDiv" class="col-md-3 p-2 m-2">
+        <h1 class="pb-2">Top Spanish Songs</h1>
+        {% for track in topspainsongs %}
+            <div class="row pb-3">
+                <div class="col-md-1">
+                <h3 id="numbering">{{ forloop.counter }}</h3>
+                </div>
+                <div class="col-md-2">
+                    <img id="trackImg" src="{{ track.track.album.images.2.url }}" alt="{{track.track.name}}">
+                </div>
+                <div id="trackInfo" class="col-md">
+                    <a href="{% url 'main:songdetail' song_id=track.track.id %}">
+                    {{ track.track.name }} by {{ track.track.artists.0.name }}</a>
+                </div>
+            </div>
+        {% endfor %}
+
+    </div>
+    <div id="songDiv" class="col-md-3 p-2 m-2">
+        <h1 class="pb-2">Top French Songs</h1>
+        {% for track in topfrancesongs %}
+            <div class="row pb-3">
+                <div class="col-md-1">
+                    <h3 id="numbering">{{ forloop.counter }}</h3>
+                </div>
+                <div class="col-md-2">
+                    <img id="trackImg" src="{{ track.track.album.images.2.url }}" alt="{{track.track.name}}">
+                </div>
+                <div id="trackInfo" class="col-md">
+                    <a href="{% url 'main:songdetail' song_id=track.track.id %}">
+                    {{ track.track.name }} by {{ track.track.artists.0.name }}</a>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
 </div>
 
-{% endfor %}
+
+
+
+<div id="topSpain" class="container">
+
+
+
+</div>
 {% endblock %} 

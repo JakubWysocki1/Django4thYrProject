@@ -1,35 +1,32 @@
-<nav class="navbar navbar-expand-sm bg-dark">
-    <!-- Links -->
-    <ul class="navbar-nav">
-      <li class="nav-item">
-        <a class="nav-link" href="{% url 'main:home' %}">Home</a>
-      </li>
-      <li class="nav-item">
-        <a class="nav-link" href="#">Link 2</a>
-      </li>
-      <li class="nav-item">
-        <a class="nav-link" href="#">Link 3</a>
-      </li>
-    </ul>
-    <div class="my_custom_menu text-light" >
-		<ul>
-            {% if user.is_authenticated %}
-			<li>
-                Welcome <a href="{% url 'profile' %}">{{ user.username }}
-                <img id="imageprofile" src="{{ user.userprofile.profile_picture.url }}"></a>
-			</li>
-			<li>
-				<a href="{% url 'signout' %}">Sign Out <i class="fas fa-sign-out-alt"></i></a>
-			</li>
-			{% else %}
-			<li>
-				<a href="{% url 'signup' %}">Sign Up <i class="fas fa-user-plus"></i></a>
-			</li>
-			<li>
-				<a href="{% url 'signin' %}">Sign In <i class="fas fa-sign-in-alt"></i></a>
-			</li>
-			{% endif %}
-		</ul>
-		
-	  </div>
-  </nav>
+<div class="container">
+  <nav class="navbar navbar-expand-lg navbar-light" style="background-color: #eaeaea;">
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarTogglerDemo01" aria-controls="navbarTogglerDemo01" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarTogglerDemo01">
+      <a class="navbar-brand" href="#">Hidden brand</a>
+      <ul class="navbar-nav mr-auto mt-2 mt-lg-0">
+        <li class="nav-item active">
+          <a class="nav-link" href="{% url 'main:home' %}">Home <span class="sr-only">(current)</span></a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="{% url 'main:home' %}">Home</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="#">Forum</a>
+        </li>
+      </ul>
+      <div class="dropdown justify-content-right">
+        <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+          Welcome {{ user.username }}
+          <img id="imageprofile" src="{{ user.userprofile.profile_picture.url }}"></a>
+        </button>
+        <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+          <a class="dropdown-item" href="{% url 'profile' %}">Profile</a>
+          
+          <a class="dropdown-item" href="{% url 'signout' %}">Sign Out <i class="fas fa-sign-out-alt"></i></a>
+        </div>
+      </div>
+    </div>
+ </nav>
+</div>

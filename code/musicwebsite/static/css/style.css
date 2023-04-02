@@ -1,32 +1,34 @@
 
 #imageprofile{
-max-width: 50px;
-max-height: 50px;
+    max-width: 50px;
+    max-height: 50px;
 }
 
+#songDiv{
+    border-style: solid;
+    border-color: rgba(211, 211, 211, 0.456);
+    border-radius: 10px;
+}
+/* 
 #topGlobal{
-    display: flex;
-    align-items: center;
-    margin-bottom: 10px;
+    border: solid;
+    float: left;
+}
+
+#topSpain {
+    border:solid;
 }
 
 #numbering { 
     padding-top: 5px;
     padding-right: 10px;
 }
-
+ */
 #trackImg{
     width: 40px;
-    height: 40px;
-    object-fit: cover;
-    margin-right: 20px;
+    height: 40px;    
 }
 
-
-#trackInfo {
-    flex: 1;
-    margin-top: 10px;
-  }
 
 #trackDetailImg{
     width: 200px;
@@ -50,4 +52,10 @@ max-height: 50px;
     text-decoration: none;
 }
 
+#commentreply {
+    padding-left: 20px;
+}
 
+.dislikecount, .likecount{
+    padding-top: 3px;
+}

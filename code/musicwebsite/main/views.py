@@ -4,8 +4,8 @@ import requests
 from spotipy.oauth2 import SpotifyOAuth, SpotifyClientCredentials
 from spotipy import Spotify
 from django.shortcuts import get_object_or_404
-from .forms import CommentForm
-from .models import Comment, Review
+from .forms import CommentForm, ReplyForm
+from .models import Comment, Review, CommentReply
 from django.http import JsonResponse
 
 
@@ -31,21 +31,32 @@ def api(request):
 
 
     top_songsGlobalURI = 'spotify:playlist:37i9dQZEVXbMDoHDwVN2tF'
-    top_songsResults = sp.playlist_tracks(top_songsGlobalURI)
-    # print(top_songsResults)
-    topsongs = top_songsResults['items']
+    top_songsSpainURI = 'spotify:playlist:37i9dQZEVXbNFJfN1Vw8d9'
+    top_songsFranceURI = 'spotify:playlist:37i9dQZEVXbIPWwFssbupI'
     
+    top_songsResults = sp.playlist_tracks(top_songsGlobalURI)
+    top_spainsongsResults = sp.playlist_tracks(top_songsSpainURI)
+    top_francesongsResults = sp.playlist_tracks(top_songsFranceURI)
 
-    # taylor_uri = 'spotify:artist:06HL4z0CvFAxyc27GXpf02'
-    # results = sp.artist_albums(taylor_uri, album_type='album')
-    # albums = results['items']
+    topspainsongs = top_spainsongsResults['items']
+    topsongs = top_songsResults['items']
+    topfrancesongs = top_francesongsResults['items']
+
         
     while top_songsResults['next']:
         top_songsResults = sp.next(top_songsResults)
         topsongs.extend(top_songsResults['items'])
+
+    while top_spainsongsResults['next']:
+        top_spainsongsResults = sp.next(top_spainsongsResults)
+        topspainsongs.extend(top_spainsongsResults['items'])
+
+    while top_francesongsResults['next']:
+        top_francesongsResults = sp.next(top_francesongsResults)
+        topfrancesongs.extend(top_francesongsResults['items'])
     
     #print(albums[0])
-    return render(request, 'home.html', {'topsongs':topsongs})
+    return render(request, 'home.html', {'topsongs':topsongs, 'topspainsongs': topspainsongs,'topfrancesongs': topfrancesongs})
 
 def song_detail(request, song_id):
     sp = authentication()
@@ -72,22 +83,50 @@ def song_detail(request, song_id):
             comment = get_object_or_404(Comment, id=comment_id, user=request.user)
             comment.delete()
             return redirect('main:songdetail', song_id=song_id)
+        
         elif 'editComment' in request.POST:
             comment_id = request.POST.get('editComment')
-            print(comment_id)
             comment = get_object_or_404(Comment, id=comment_id, user=request.user)
-    
             editform = CommentForm(request.POST, instance=comment)
             if editform.is_valid():
                 editform.save()
                 return redirect('main:songdetail', song_id=song_id)
             
+        elif 'parent_comment_id' in request.POST:
+            replyform = ReplyForm(request.POST)
+            if replyform.is_valid():
+                reply = replyform.save(commit=False)
+                reply.user = request.user
+                reply.comment_id = replyform.cleaned_data['parent_comment_id']
+                reply.save()
+                return redirect('main:songdetail', song_id=song_id)
+            
+        elif 'deleteReply' in request.POST:
+            reply_id = request.POST.get('deleteReply')
+            reply = get_object_or_404(CommentReply, id=reply_id, user=request.user)
+            reply.delete()
+            return redirect('main:songdetail', song_id=song_id)
+        
+        elif 'editReply' in request.POST:                                                                                   
+            reply_id = request.POST.get('editReply')
+            reply = get_object_or_404(CommentReply, id=reply_id, user=request.user)
+            replyform = ReplyForm(request.POST, instance=reply)
+            if replyform.is_valid():
+                replyform.save()
+                return redirect('main:songdetail', song_id=song_id)
+
+
+
+            
+
+
     else:
         form = CommentForm()
         editform = CommentForm()
+        replyform = ReplyForm()
       
 
-    return render(request, 'songdetail.html', {'songinfo': songinfo, 'form': form, 'comments': comments, 'comment_count': comment_count, 'editform': editform})
+    return render(request, 'songdetail.html', {'songinfo': songinfo, 'form': form, 'comments': comments, 'comment_count': comment_count, 'editform': editform, 'replyform': replyform})
 
 
 def toggle_comment_reaction(request):

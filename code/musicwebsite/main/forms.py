@@ -1,5 +1,5 @@
 from django import forms
-from .models import Comment
+from .models import Comment, CommentReply
 
 class CommentForm(forms.ModelForm):
 
@@ -10,3 +10,12 @@ class CommentForm(forms.ModelForm):
             'text': forms.Textarea(attrs={'class': 'form-control', 'placeholder': 'Write a comment...'})
         }
 
+class ReplyForm(forms.ModelForm):
+    parent_comment_id = forms.IntegerField(widget=forms.HiddenInput())
+
+    class Meta:
+        model = CommentReply
+        fields = ['text']
+        widgets = {
+            'text': forms.Textarea(attrs={'class': 'form-control', 'placeholder': 'Write a reply...'})
+        }
