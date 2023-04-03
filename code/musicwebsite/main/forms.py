@@ -19,3 +19,11 @@ class ReplyForm(forms.ModelForm):
         widgets = {
             'text': forms.Textarea(attrs={'class': 'form-control', 'placeholder': 'Write a reply...'})
         }
+
+class EditReplyForm(forms.ModelForm):
+    class Meta:
+        model = CommentReply
+        fields = ['text']
+        widgets = {
+            'text': forms.Textarea(attrs={'class': 'form-control', 'placeholder': 'Write a reply...'})
+        }

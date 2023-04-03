@@ -1,4 +1,5 @@
 
+/* Home Page */
 #imageprofile{
     max-width: 50px;
     max-height: 50px;
@@ -24,15 +25,58 @@
     padding-right: 10px;
 }
  */
+
+
+/* SongDetail Page */
 #trackImg{
     width: 40px;
     height: 40px;    
+}
+
+#imgcontainer {
+    position: relative;
+    width: 50%;
+    display: inline-block;
+    
+  }
+  
+  /* Make the image responsive */
+  #imgcontainer img {
+    width: 100%;
+    height: auto;
+    
+  }
+  
+  /* Style the button and place it in the middle of the container/image */
+  #imgcontainer #play-pause-button {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    -ms-transform: translate(-50%, -50%);
+    background-color: #c0bdbdee;
+    color: white;
+    font-size: 16px;
+    padding: 12px 24px;
+    border: none;
+    cursor: pointer;
+    border-radius: 5px;
+  }
+  
+  #imgcontainer .btn:hover {
+    background-color: transparent;
+  }
+
+#volume-slider{
+    width: 50%;
+    touch-action: none;
 }
 
 
 #trackDetailImg{
     width: 200px;
     height: 200px;
+    
 }
 
 .modal-title{
@@ -59,3 +103,32 @@
 .dislikecount, .likecount{
     padding-top: 3px;
 }
+
+.liked {
+    color:red;
+}
+
+.image-container {
+    position: relative;
+    display: inline-block;
+  }
+  
+  .play-button {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 1;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background-color: rgba(0, 0, 0, 0.5);
+    color: white;
+    text-align: center;
+    line-height: 50px;
+    font-size: 24px;
+  }
+  
+  .play-button:hover {
+    cursor: pointer;
+  }

@@ -4,7 +4,7 @@ import requests
 from spotipy.oauth2 import SpotifyOAuth, SpotifyClientCredentials
 from spotipy import Spotify
 from django.shortcuts import get_object_or_404
-from .forms import CommentForm, ReplyForm
+from .forms import CommentForm, ReplyForm, EditReplyForm
 from .models import Comment, Review, CommentReply
 from django.http import JsonResponse
 
@@ -68,6 +68,10 @@ def song_detail(request, song_id):
     comment_count = comments.count()
 
     ratings = Review.objects.filter(song_id=song_id)
+    form = CommentForm()
+    editform = CommentForm()
+    replyform = ReplyForm()
+    editreplyform = EditReplyForm()
 
     if request.method == 'POST':
         if 'addComment' in request.POST:
@@ -93,6 +97,7 @@ def song_detail(request, song_id):
                 return redirect('main:songdetail', song_id=song_id)
             
         elif 'parent_comment_id' in request.POST:
+            print('parent_comment_id')
             replyform = ReplyForm(request.POST)
             if replyform.is_valid():
                 reply = replyform.save(commit=False)
@@ -103,30 +108,20 @@ def song_detail(request, song_id):
             
         elif 'deleteReply' in request.POST:
             reply_id = request.POST.get('deleteReply')
+            print('deletereply')
             reply = get_object_or_404(CommentReply, id=reply_id, user=request.user)
             reply.delete()
             return redirect('main:songdetail', song_id=song_id)
-        
-        elif 'editReply' in request.POST:                                                                                   
+
+        elif 'editReply' in request.POST:
             reply_id = request.POST.get('editReply')
             reply = get_object_or_404(CommentReply, id=reply_id, user=request.user)
-            replyform = ReplyForm(request.POST, instance=reply)
-            if replyform.is_valid():
-                replyform.save()
+            editreplyform = EditReplyForm(request.POST, instance=reply)
+            if editreplyform.is_valid():
+                editreplyform.save()
                 return redirect('main:songdetail', song_id=song_id)
-
-
-
             
-
-
-    else:
-        form = CommentForm()
-        editform = CommentForm()
-        replyform = ReplyForm()
-      
-
-    return render(request, 'songdetail.html', {'songinfo': songinfo, 'form': form, 'comments': comments, 'comment_count': comment_count, 'editform': editform, 'replyform': replyform})
+    return render(request, 'songdetail.html', {'songinfo': songinfo, 'form': form, 'comments': comments, 'comment_count': comment_count, 'editform': editform, 'replyform': replyform, 'editreplyform': editreplyform})
 
 
 def toggle_comment_reaction(request):

@@ -5,9 +5,20 @@
 <div class="container">
     <div class="jumbotron">
         <div id="track detail" class="row">
-            <div class="col-sm-5 text-lg-right">
-                <img id="trackDetailImg" src="{{ songinfo.album.images.1.url }}" alt="{{ songinfo.name }}">
+            <div class="col-sm-5 text-sm-right">
+                <div id="imgcontainer">
+                    <img id="trackDetailImg" src="{{ songinfo.album.images.1.url }}" alt="{{ songinfo.name }}" style="display: inline-block;" onclick="playSong('{{ songinfo.preview_url }}')">
+                    <div class="play-button-container">
+                        <button id="play-pause-button" class="btn btn-link">
+                            <i id="play-pause-icon" class="fas fa-play"></i>
+                        </button>
+                    </div>
+                </div>
+                <div id="slider">
+                    <input id="volume-slider" type="range" min="0" max="1" step="0.05" value="1">
+                </div>
             </div>
+        
             <div class="col-sm-5">
                 <div id="trackDetailInfo">
                     <h1>{{songinfo.name}}</h1>
@@ -17,6 +28,7 @@
                 </div>
             </div>
         </div>
+        
     </div>
     {% if user.is_authenticated %}
     <form method="post">
@@ -149,6 +161,7 @@
                                     <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
                                     <button type="submit" class="btn btn-primary" form="replyCommentForm{{ comment.id }}" onclick="event.preventDefault(); document.getElementById('reply-form-{{ comment.id }}').submit();">Reply</button>
                                 </div>
+
                             </div>
                         </div>
                     </div>
@@ -160,7 +173,7 @@
                         <div>
                             <h5><img id="imageprofile" src="{{ reply.user.userprofile.profile_picture.url }}">
                             <span>{{reply.user}}
-                                {% if reply.user == request.user %}
+                            {% if reply.user == request.user %}
                                 <span class="pl-3">
                                     <button id="editButton-{{reply.id}}" type="button" class="btn btn-link btn-sm" data-toggle="modal" data-target="#editReply-{{reply.id}}" onclick="populateEditForm('{{reply.id}}', '{{reply.text}}')">Edit
                                     </button>
@@ -175,7 +188,7 @@
                             <div class="modal-dialog modal-dialog-centered" role="document">
                                 <div class="modal-content">
                                     <div class="modal-header">
-                                        <h5 class="modal-title" id="editReplyLabel">Edit Reply</h5>
+                                        <h5 class="modal-title" id="editReplyLabel">Edit your reply</h5>
                                         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                                             <span aria-hidden="true">&times;</span>
                                         </button>
@@ -183,18 +196,18 @@
                                     <div class="modal-body">
                                         <form id="edit-form-{{reply.id}}" method="POST" action="{% url 'main:songdetail' song_id=songinfo.id %}" id="editReplyForm{{reply.id}}">
                                             {% csrf_token %}
-                                            {{ replyform | crispy }}
+                                            {{ editreplyform | crispy}}
                                             <input type="hidden" name="editReply" value="{{ reply.id }}">
                                         </form>
                                     </div>
                                     <div class="modal-footer">
                                         <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                                        <button type="submit" class="btn btn-primary" form="editReplyForm{{reply.id}}" onclick="event.preventDefault(); document.getElementById('edit-form-{{reply.id}}').submit();">Save</button>
-        
+                                        <button type="submit" class="btn btn-primary" form="editCommentForm{{comment.id}}" onclick="event.preventDefault(); document.getElementById('edit-form-{{reply.id}}').submit();">Save</button>
                                     </div>
                                 </div>
                             </div>
                         </div>
+
                         <div class="modal fade" id="deleteReply-{{reply.id}}" tabindex="-1" role="dialog" aria-labelledby="deleteReplyLabel" aria-hidden="true">
                             <div class="modal-dialog modal-dialog-centered" role="document">
                                 <div class="modal-content">
@@ -228,6 +241,34 @@
     {% endfor %}
 </div>
 <script>
+const playPauseButton = document.querySelector('#play-pause-button');
+const playPauseIcon = document.querySelector('#play-pause-icon');
+const audioPlayer = new Audio('{{ songinfo.preview_url }}');
+const volumeSlider = document.querySelector('#volume-slider');
+
+let isPlaying = false;
+
+function togglePlayPause() {
+  if (isPlaying) {
+    audioPlayer.pause();
+    playPauseIcon.classList.remove('fa-pause');
+    playPauseIcon.classList.add('fa-play');
+  } else {
+    audioPlayer.play();
+    playPauseIcon.classList.remove('fa-play');
+    playPauseIcon.classList.add('fa-pause');
+  }
+  isPlaying = !isPlaying;
+}
+
+playPauseButton.addEventListener('click', togglePlayPause);
+
+volumeSlider.addEventListener('input', function() {
+  audioPlayer.volume = volumeSlider.value;
+});
+
+    playPauseButton.addEventListener('click', togglePlayPause);
+     
     function populateEditForm(commentId, commentText) {
         var editForm = document.getElementById("edit-form-" + commentId);
         var commentInput = editForm.querySelector("textarea[name='text']");
