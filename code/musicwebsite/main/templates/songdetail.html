@@ -3,6 +3,13 @@
 {% load crispy_forms_tags %}
 {% block content %}
 <div class="container">
+    {% if messages %}
+    <div id="alert" class="alert alert-success">
+        {% for message in messages %}
+        <strong{% if message.tags %} class="{{ message.tags }}">{% endif %}{{ message }}</strong>
+        {% endfor %}
+    </div>
+    {% endif %}
     <div class="jumbotron">
         <div id="track detail" class="row">
             <div class="col-sm-5 text-sm-right">
@@ -25,6 +32,7 @@
                     <p>By {{songinfo.artists.0.name}}</p>
                     <li>Popularity {{songinfo.popularity}}/100</li>
                     <li>Released: {{songinfo.album.release_date}}</li>
+                    <li><a href="{{songinfo.uri}}">Open in Spotify</a></li>
                 </div>
             </div>
         </div>
@@ -50,7 +58,7 @@
                 <div class="">
                     <h5><img id="imageprofile" src="{{ comment.user.userprofile.profile_picture.url }}">
                     <span>
-                        {{comment.user}}
+                        <a href="{% url 'accounts:profile' profile_name=comment.user %}">{{comment.user}}</a>
                             <span>
                                 <div id="buttons" class="btn-group">
                                     <button id="likeButton-{{ comment.id }}" type="button" class="likeButton btn btn-link btn-sm" onclick="toggleCommentReaction('{{ comment.id }}', 'like')">
@@ -172,7 +180,8 @@
                     <div id="commentreply">
                         <div>
                             <h5><img id="imageprofile" src="{{ reply.user.userprofile.profile_picture.url }}">
-                            <span>{{reply.user}}
+                            <a href="{% url 'accounts:profile' profile_name=reply.user %}">{{reply.user}}</a>
+                            <span>
                             {% if reply.user == request.user %}
                                 <span class="pl-3">
                                     <button id="editButton-{{reply.id}}" type="button" class="btn btn-link btn-sm" data-toggle="modal" data-target="#editReply-{{reply.id}}" onclick="populateEditForm('{{reply.id}}', '{{reply.text}}')">Edit
@@ -241,6 +250,13 @@
     {% endfor %}
 </div>
 <script>
+const alertMessage = document.querySelector('#alert');
+
+// Hide the alert message after 3 seconds
+setTimeout(() => {
+    alertMessage.style.display = 'none';
+}, 3000);
+
 const playPauseButton = document.querySelector('#play-pause-button');
 const playPauseIcon = document.querySelector('#play-pause-icon');
 const audioPlayer = new Audio('{{ songinfo.preview_url }}');

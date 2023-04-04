@@ -12,6 +12,7 @@ class CustomUser(AbstractUser):
 class UserProfile(models.Model):
     user = models.OneToOneField(CustomUser, on_delete=models.CASCADE)
     profile_picture = models.ImageField(default='default.jpg',upload_to='profile_pictures')
+    bio = models.TextField(max_length=1500, blank=True)
     
 
     def __str__(self):

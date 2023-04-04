@@ -10,23 +10,31 @@
           <a class="nav-link" href="{% url 'main:home' %}">Home <span class="sr-only">(current)</span></a>
         </li>
         <li class="nav-item">
-          <a class="nav-link" href="{% url 'main:home' %}">Home</a>
+          <a class="nav-link" href="{% url 'main:home' %}">New Releases</a>
         </li>
         <li class="nav-item">
-          <a class="nav-link" href="#">Forum</a>
+          <a class="nav-link" href="{% url 'main:trendingSongs' %}">Trending Songs</a>
         </li>
       </ul>
+      {% if user.is_authenticated %}
       <div class="dropdown justify-content-right">
+        
         <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
           Welcome {{ user.username }}
           <img id="imageprofile" src="{{ user.userprofile.profile_picture.url }}"></a>
         </button>
         <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-          <a class="dropdown-item" href="{% url 'profile' %}">Profile</a>
+          <a class="dropdown-item" href="{% url 'accounts:profile' profile_name=user.username %}">Profile</a>
           
-          <a class="dropdown-item" href="{% url 'signout' %}">Sign Out <i class="fas fa-sign-out-alt"></i></a>
+          <a class="dropdown-item" href="{% url 'accounts:signout' %}">Sign Out <i class="fas fa-sign-out-alt"></i></a>
         </div>
       </div>
+      {% else %}
+      <div class="justify-content-right">
+        <a href="{% url 'accounts:signin' %}">SignIn</a>
+        <a href="{% url 'accounts:signup' %}">SignUp</a>
+      </div>
+      {% endif %}
     </div>
  </nav>
 </div>

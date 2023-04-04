@@ -7,6 +7,8 @@ from django.shortcuts import get_object_or_404
 from .forms import CommentForm, ReplyForm, EditReplyForm
 from .models import Comment, Review, CommentReply
 from django.http import JsonResponse
+from django.core.paginator import Paginator
+from django.contrib import messages
 
 
 # Create your views here.
@@ -23,40 +25,21 @@ def authentication():
 
 
 def home(request):
-    return render(request, 'music/home.html')
-
-def api(request):
     sp = authentication()
 
-
-
     top_songsGlobalURI = 'spotify:playlist:37i9dQZEVXbMDoHDwVN2tF'
-    top_songsSpainURI = 'spotify:playlist:37i9dQZEVXbNFJfN1Vw8d9'
-    top_songsFranceURI = 'spotify:playlist:37i9dQZEVXbIPWwFssbupI'
-    
     top_songsResults = sp.playlist_tracks(top_songsGlobalURI)
-    top_spainsongsResults = sp.playlist_tracks(top_songsSpainURI)
-    top_francesongsResults = sp.playlist_tracks(top_songsFranceURI)
 
-    topspainsongs = top_spainsongsResults['items']
     topsongs = top_songsResults['items']
-    topfrancesongs = top_francesongsResults['items']
-
-        
+    
     while top_songsResults['next']:
         top_songsResults = sp.next(top_songsResults)
         topsongs.extend(top_songsResults['items'])
 
-    while top_spainsongsResults['next']:
-        top_spainsongsResults = sp.next(top_spainsongsResults)
-        topspainsongs.extend(top_spainsongsResults['items'])
 
-    while top_francesongsResults['next']:
-        top_francesongsResults = sp.next(top_francesongsResults)
-        topfrancesongs.extend(top_francesongsResults['items'])
     
     #print(albums[0])
-    return render(request, 'home.html', {'topsongs':topsongs, 'topspainsongs': topspainsongs,'topfrancesongs': topfrancesongs})
+    return render(request, 'home.html', {'topsongs':topsongs,})
 
 def song_detail(request, song_id):
     sp = authentication()
@@ -81,11 +64,13 @@ def song_detail(request, song_id):
                 comment.user = request.user
                 comment.song_id = song_id
                 comment.save()
+                messages.success(request, 'Comment Added!')
                 return redirect('main:songdetail', song_id=song_id)
         elif 'deleteComment' in request.POST:
             comment_id = request.POST.get('deleteComment')
             comment = get_object_or_404(Comment, id=comment_id, user=request.user)
             comment.delete()
+            messages.warning(request, 'Comment Deleted!')
             return redirect('main:songdetail', song_id=song_id)
         
         elif 'editComment' in request.POST:
@@ -94,6 +79,7 @@ def song_detail(request, song_id):
             editform = CommentForm(request.POST, instance=comment)
             if editform.is_valid():
                 editform.save()
+                messages.success(request, 'Comment Updated!')
                 return redirect('main:songdetail', song_id=song_id)
             
         elif 'parent_comment_id' in request.POST:
@@ -104,6 +90,7 @@ def song_detail(request, song_id):
                 reply.user = request.user
                 reply.comment_id = replyform.cleaned_data['parent_comment_id']
                 reply.save()
+                messages.success(request, 'Reply Posted!')
                 return redirect('main:songdetail', song_id=song_id)
             
         elif 'deleteReply' in request.POST:
@@ -111,6 +98,7 @@ def song_detail(request, song_id):
             print('deletereply')
             reply = get_object_or_404(CommentReply, id=reply_id, user=request.user)
             reply.delete()
+            messages.warning(request, 'Reply Deleted!')
             return redirect('main:songdetail', song_id=song_id)
 
         elif 'editReply' in request.POST:
@@ -119,9 +107,32 @@ def song_detail(request, song_id):
             editreplyform = EditReplyForm(request.POST, instance=reply)
             if editreplyform.is_valid():
                 editreplyform.save()
+                messages.success(request, 'Reply Updated!')
                 return redirect('main:songdetail', song_id=song_id)
             
     return render(request, 'songdetail.html', {'songinfo': songinfo, 'form': form, 'comments': comments, 'comment_count': comment_count, 'editform': editform, 'replyform': replyform, 'editreplyform': editreplyform})
+
+def trendingSongs(request):
+    sp = authentication()
+
+    top_songsSpainURI = 'spotify:playlist:37i9dQZEVXbNFJfN1Vw8d9'
+    top_songsFranceURI = 'spotify:playlist:37i9dQZEVXbIPWwFssbupI'
+
+    top_spainsongsResults = sp.playlist_tracks(top_songsSpainURI)
+    top_francesongsResults = sp.playlist_tracks(top_songsFranceURI)
+
+    topfrancesongs = top_francesongsResults['items']
+    topspainsongs = top_spainsongsResults['items']
+
+    while top_spainsongsResults['next']:
+        top_spainsongsResults = sp.next(top_spainsongsResults)
+        topspainsongs.extend(top_spainsongsResults['items'])
+
+    while top_francesongsResults['next']:
+        top_francesongsResults = sp.next(top_francesongsResults)
+        topfrancesongs.extend(top_francesongsResults['items'])
+
+    return render(request, 'trendingSongs.html', { 'topspainsongs': topspainsongs,'topfrancesongs': topfrancesongs})
 
 
 def toggle_comment_reaction(request):

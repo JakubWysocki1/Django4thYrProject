@@ -1,23 +1,21 @@
 {% extends "base.html" %}
 {% load crispy_forms_tags %}
 {% block content %}
-<div>
+<div class="container">
     {% if not form.is_valid %}
-        <div class="mx-auto">
-            <br>
-            <h1 class="my_title text-center">Create a new account</h1>
-            <br>
-            <div class="col-9 col-sm-9 col-md-6 col-lg-5 bg-light">
-                <br>
-                <p>Enter the following information to create a new account.</p>
-                <form method="post">
-                    <p>{{ form | crispy }}</p>
-                    {% csrf_token %}
-                    <button type="submit" class="btn btn-success">Register Account</button>
-                </form>
-                <br>
-            </div>
-        </div>
+            <h1 class="my_title text-center pt-4 pb-3">Create a new account</h1>
+            <div class="row justify-content-md-center">  
+                <div id="signinDetails" class="col-md-8 bg-light p-5">
+                    <div>
+                        <h3 class="my_title">Enter the following information to create a new account.</h3>
+                        <form method="post">
+                            {% csrf_token %}
+                            <p>{{ form | crispy }}</p>
+                            <button type="submit" class="btn btn-success">Register Account</button>
+                        </form>
+                    </div>
+                </div>
+            </div>  
     {% else %}
         <div class="mx-auto">
             <br>
@@ -30,7 +28,8 @@
                     <br>
                     Your account has been created and it is ready to use.
                     <br>
-                    <a href="{% url 'main:home' %}">Continue browsing</a>
+                    <a href="{% url 'main:home' %}">Home</a>
+                    <a href="{% url 'accounts:signin' %}">Signin</a>
                 </p>
             </div>
         </div>
