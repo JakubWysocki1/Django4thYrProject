@@ -9,8 +9,12 @@ from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth import login, authenticate, logout
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib import messages
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import render, get_object_or_404, redirect
 from django.http import HttpResponseForbidden
+from spotipy.oauth2 import SpotifyOAuth
+from django.conf import settings
+import spotipy
+
 
 
 def signupView(request):
@@ -77,6 +81,8 @@ def profileDetailsView(request, profile_name):
 
 
     if request.method == "POST":
+        u_form = UserUpdateForm(request.POST, instance=request.user)
+        p_form = ProfileUpdateForm(request.POST, request.FILES, instance=request.user.userprofile)
         if u_form.is_valid() and p_form.is_valid():
             u_form.save()
             p_form.save()
@@ -85,7 +91,7 @@ def profileDetailsView(request, profile_name):
 
     else:
         u_form = UserUpdateForm(instance=request.user)
-        p_form = ProfileUpdateForm(request.POST, request.FILES, instance=request.user.userprofile)
+        p_form = ProfileUpdateForm(instance=request.user.userprofile)
 
 
     context = {
@@ -94,3 +100,63 @@ def profileDetailsView(request, profile_name):
         'profile_name': profile_name
     }
     return render(request, 'profileDetails.html', context)
+
+
+
+sp_oauth = spotipy.oauth2.SpotifyOAuth(
+            client_id='a2be13064936401992b518216aade28c',
+            client_secret='ef320547195a4b80b5fe92c931486723',
+            redirect_uri='http://localhost:8000/accounts/spotifyStats/callback/',
+            scope=['user-read-email','user-read-private','user-top-read'],
+            show_dialog=True,
+            cache_path=None)
+
+def spotify_authorize(request):
+    if request.user.is_authenticated:
+        # Create a new SpotifyOAuth object
+        auth_url = sp_oauth.get_authorize_url()
+        return redirect(auth_url)
+    else:
+        return redirect('accounts:signin')
+
+def spotify_callback(request):
+   
+    code = request.GET.get('code')
+    token_info = sp_oauth.get_access_token(code)
+    print(token_info['access_token'])
+    request.session['access_token'] = token_info['access_token']
+    return redirect('accounts:spotifyStats')
+
+
+def spotify_stats(request):
+    access_token = request.session.get('access_token')
+    
+    if not access_token:
+        return redirect('accounts:spotify_authorize')
+    sp = spotipy.Spotify(auth=access_token)
+    userartists = sp.current_user_top_artists(time_range='long_term')
+    usertracks = sp.current_user_top_tracks(time_range='long_term')
+
+    return render(request, 'spotify_stats.html', {'artists': userartists, 'tracks': usertracks})
+
+
+
+
+    # topartists = userartists['items']
+    # artists=[]
+    # toptracks = usertracks['items']
+    # tracks=[]
+    # for artist in topartists:
+    #     templist = []
+    #     templist.append(artist['name']) 
+    #     templist.append(artist['images'][2]['url'])
+    #     templist.append(artist['external_urls']['spotify'])
+    #     artists.append(templist)
+    # for track in toptracks:
+    #     templist = []
+    #     templist.append(track['name']) 
+    #     templist.append(track['album']['images'][1]['url'])
+    #     templist.append(track['artists'][0]['name'])
+    #     templist.append(track['id'])
+    #     tracks.append(templist)
+

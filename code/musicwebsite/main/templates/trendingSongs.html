@@ -2,42 +2,113 @@
 {% load static %}
 {% load crispy_forms_tags %}
 {% block content %}
-<div class="row justify-content-md-center">
-    <div id="songDiv" class="col-md-5 p-2 m-2">
-        <h1 class="pb-2">Top Spanish Songs</h1>
-        {% for track in topspainsongs %}
-            <div class="row pb-3">
-                <div class="col-md-1">
-                <h3 id="numbering">{{ forloop.counter }}</h3>
-                </div>
-                <div class="col-md-2">
-                    <img id="trackImg" src="{{ track.track.album.images.2.url }}" alt="{{track.track.name}}">
-                </div>
-                <div id="trackInfo" class="col-md">
-                    <a href="{% url 'main:songdetail' song_id=track.track.id %}">
-                    {{ track.track.name }} by {{ track.track.artists.0.name }}</a>
+<div class="container">
+    Select a Genra
+    <select>
+        <option selected></option>
+        {% for genre in genras %}
+        <option value="{{ genre }}">{{ genre }}</option>
+        {% endfor %}
+    </select>  
+    Select a Country
+    <select id="country-select">
+        <option selected value="global">The World</option>
+        {% for country in countries %}
+        <option value="{{ country.1 }}">{{ country.0 }}</option>
+        {% endfor %}
+    </select>  
+    
+    <div class="row justify-content-md-center">
+        <div class="col">
+            <div class="row">
+                    <h1 id="trendingIn" class="pb-2">Trending Songs in The World</h1>
+                    <small id="playlistLink" class="my-auto">Open in Spotify</small>
+            </div>
+            <div class="col-md-6 pt-4"> 
+                <div id="results">
+                    {% for track in topsongs %}
+                    <div class="row pb-3">
+                        <div class="col-md-2">
+                            <img id="trackImg" src="{{ track.track.album.images.2.url }}" alt="{{track.track.name}}">
+                        </div>
+                        <div id="trackInfo" class="col-md my-auto">
+                            <a href="{% url 'main:songdetail' song_id=track.track.id %}">
+                            {{ track.track.name }} by {{ track.track.artists.0.name }}</a>
+                        </div>
+                    </div>
+                {% endfor %}
                 </div>
             </div>
-        {% endfor %}
-
-    </div>
-    <div id="songDiv" class="col-md-5 p-2 m-2">
-        <h1 class="pb-2">Top French Songs</h1>
-        {% for track in topfrancesongs %}
-            <div class="row pb-3">
-                <div class="col-md-1">
-                    <h3 id="numbering">{{ forloop.counter }}</h3>
-                </div>
-                <div class="col-md-2">
-                    <img id="trackImg" src="{{ track.track.album.images.2.url }}" alt="{{track.track.name}}">
-                </div>
-                <div id="trackInfo" class="col-md">
-                    <a href="{% url 'main:songdetail' song_id=track.track.id %}">
-                    {{ track.track.name }} by {{ track.track.artists.0.name }}</a>
-                </div>
-            </div>
-        {% endfor %}
+        </div>
     </div>
 </div>
 
+ 
+
+
+<script>
+function handleCountrySelect(selectedValue) {
+    // Your code to handle the selected value goes here
+    console.log(selectedValue);
+
+    $.ajax({
+        url: '/searchPlaylist/',
+        data: {
+            'countryName': $('#country-select option:selected').text(),
+            'countryCode': selectedValue
+        },
+        dataType: 'json',
+        success: function(response) {
+            // Handle successful response
+            var tracks = response.tracks;
+            console.log(response)
+            
+            var results = '';
+            var countryName = $('#country-select option:selected').text();
+            
+            console.log(countryName);
+            $('#trendingIn').text('Trending Songs in ' + countryName);
+            
+
+
+            if(tracks.length == 0){
+                var trackHtml = '<div class="row track pb-3">';
+                trackHtml += '<p>Nothing to display...</p>'
+                trackHtml += '</div>';
+                results += trackHtml;
+
+            } else {
+                $('#playlistLink').html('<a href="'+ tracks[0].playlist_url+ '">Open in Spotify</a>');
+                for (var i = 1; i < tracks.length; i++) {
+                var track = tracks[i];
+
+                // Generate HTML for the track name, artist name, and cover image
+                var trackHtml = '<div class="row track pb-3">';
+                trackHtml += '<div class=col-md-2>'
+                trackHtml += '<img id="trackImg" src="' + track.image + '" alt="' + track.name + '">';
+                trackHtml += '</div>'
+                trackHtml += '<div class="col-md track-details my-auto">';
+                trackHtml += '<a href="' + "{% url 'main:songdetail' song_id='__song_id__' %}".replace('__song_id__', track.id) + '">' + track.name + ' by ' + track.artist + '</a>';
+                trackHtml += '</div>';
+                trackHtml += '</div>';
+                results += trackHtml;
+                }
+            }
+            // Iterate over the tracks array and generate HTML for each track
+            
+
+            // Update the HTML on the page with the search results
+            $('#results').html(results);
+        },
+        error: function(xhr, status, error) {
+            // Handle error
+            console.log(error);
+        }
+    });
+}
+document.getElementById("country-select").addEventListener("change", function() {
+    handleCountrySelect(this.value);
+});
+
+</script>
 {% endblock %} 

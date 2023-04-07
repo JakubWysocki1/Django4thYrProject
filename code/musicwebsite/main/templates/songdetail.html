@@ -28,11 +28,12 @@
         
             <div class="col-sm-5">
                 <div id="trackDetailInfo">
+                    
                     <h1>{{songinfo.name}}</h1>
                     <p>By {{songinfo.artists.0.name}}</p>
                     <li>Popularity {{songinfo.popularity}}/100</li>
                     <li>Released: {{songinfo.album.release_date}}</li>
-                    <li><a href="{{songinfo.uri}}">Open in Spotify</a></li>
+                    <li><a href="{{songinfo.external_urls.spotify}}">Open in Spotify</a></li>
                 </div>
             </div>
         </div>
@@ -292,62 +293,62 @@ volumeSlider.addEventListener('input', function() {
     }
 
 
-    function toggleCommentReaction(comment_id, reaction_type) {
-        var url = '{% url "main:toggle_comment_reaction" %}';
+function toggleCommentReaction(comment_id, reaction_type) {
+    var url = '{% url "main:toggle_comment_reaction" %}';
 
-        $.ajax({
-            url: url,
-            type: 'POST',
-            data: {
-                'comment_id': comment_id,
-                'reaction_type': reaction_type,
-                'csrfmiddlewaretoken': $('input[name=csrfmiddlewaretoken]').val()
-            },
-            success: function (response) {
-                $('#likes-' + comment_id).text(response.likes);
-                $('#dislikes-' + comment_id).text(response.dislikes);
-                // Toggle the color of the button based on the reaction type
-                if (reaction_type == 'like') {
-                    if ($('#likeButton-'+ comment_id).hasClass('liked')) {
-                        $('#likeIcon-'+ comment_id).css('color', 'gray');
-                        $('#likeButton-'+ comment_id).removeClass('liked');
-                    } else {
-                        $('#likeButton-'+ comment_id).addClass('liked');
-                        $('#likeIcon-'+ comment_id).css('color', 'blue');
-                        $('#dislikeButton-'+ comment_id).removeClass('disliked');
-                        $('#dislikeIcon-'+ comment_id).css('color', 'gray');
-                    }
-                } else if (reaction_type == 'dislike') {
-                    if ($('#dislikeButton-'+ comment_id).hasClass('disliked')) {
-                        $('#dislikeIcon-'+ comment_id).css('color', 'gray');
-                        $('#dislikeButton-'+ comment_id).removeClass('disliked');
-                    } else {
-                        $('#dislikeButton-'+ comment_id).addClass('disliked');
-                        $('#dislikeIcon-'+ comment_id).css('color', 'blue');
-                        $('#likeButton-'+ comment_id).removeClass('liked');
-                        $('#likeIcon-'+ comment_id).css('color', 'gray');
-                    }
+    $.ajax({
+        url: url,
+        type: 'POST',
+        data: {
+            'comment_id': comment_id,
+            'reaction_type': reaction_type,
+            'csrfmiddlewaretoken': $('input[name=csrfmiddlewaretoken]').val()
+        },
+        success: function (response) {
+            $('#likes-' + comment_id).text(response.likes);
+            $('#dislikes-' + comment_id).text(response.dislikes);
+            // Toggle the color of the button based on the reaction type
+            if (reaction_type == 'like') {
+                if ($('#likeButton-'+ comment_id).hasClass('liked')) {
+                    $('#likeIcon-'+ comment_id).css('color', 'gray');
+                    $('#likeButton-'+ comment_id).removeClass('liked');
+                } else {
+                    $('#likeButton-'+ comment_id).addClass('liked');
+                    $('#likeIcon-'+ comment_id).css('color', 'blue');
+                    $('#dislikeButton-'+ comment_id).removeClass('disliked');
+                    $('#dislikeIcon-'+ comment_id).css('color', 'gray');
                 }
-
-            },
-            error: function (xhr, status, error) {
-                console.log(xhr.responseText);
+            } else if (reaction_type == 'dislike') {
+                if ($('#dislikeButton-'+ comment_id).hasClass('disliked')) {
+                    $('#dislikeIcon-'+ comment_id).css('color', 'gray');
+                    $('#dislikeButton-'+ comment_id).removeClass('disliked');
+                } else {
+                    $('#dislikeButton-'+ comment_id).addClass('disliked');
+                    $('#dislikeIcon-'+ comment_id).css('color', 'blue');
+                    $('#likeButton-'+ comment_id).removeClass('liked');
+                    $('#likeIcon-'+ comment_id).css('color', 'gray');
+                }
             }
-        });
-    }
 
-    function showReplies(commentId) {
-    var repliesDiv = document.getElementById("replies-" + commentId);
-    var button = document.getElementById("show-replies-button-" + commentId);
+        },
+        error: function (xhr, status, error) {
+            console.log(xhr.responseText);
+        }
+    });
+}
 
-    if (repliesDiv.style.display === "none") {
-        repliesDiv.style.display = "block";
-        button.innerHTML = "Hide replies";
-    } else {
-        repliesDiv.style.display = "none";
-        button.innerHTML = "Show replies";
-    }
-    }
+function showReplies(commentId) {
+var repliesDiv = document.getElementById("replies-" + commentId);
+var button = document.getElementById("show-replies-button-" + commentId);
+
+if (repliesDiv.style.display === "none") {
+    repliesDiv.style.display = "block";
+    button.innerHTML = "Hide replies";
+} else {
+    repliesDiv.style.display = "none";
+    button.innerHTML = "Show replies";
+}
+}
 
 
 </script>
