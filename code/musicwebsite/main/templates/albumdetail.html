@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% load static %}
+{% load crispy_forms_tags %}
+{% block content %}
+<div class="container">
+    <div class="col-md-6 pt-4"> 
+        <h1>{{album_name}}</h1>
+        <div id="results">
+            {% for track in tracks %}
+            <div class="row pb-3">
+                <div class="col-md-3">
+                    <img id="trackImg" src="{{ track.image }}" alt="{{track.name}}">
+                </div>
+                <div id="trackInfo" class="col-md my-auto">
+                    <a href="{% url 'main:songdetail' track.id %}">
+                    {{ track.name }} by {{ track.artist }}</a>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}

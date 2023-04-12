@@ -137,26 +137,23 @@ def spotify_stats(request):
     userartists = sp.current_user_top_artists(time_range='long_term')
     usertracks = sp.current_user_top_tracks(time_range='long_term')
 
-    return render(request, 'spotify_stats.html', {'artists': userartists, 'tracks': usertracks})
+    topartists = userartists['items']
+    artists=[]
+    toptracks = usertracks['items']
+    tracks=[]
+    for artist in topartists:
+        templist = []
+        templist.append(artist['name']) 
+        templist.append(artist['images'][2]['url'])
+        templist.append(artist['external_urls']['spotify'])
+        artists.append(templist)
+    for track in toptracks:
+        templist = []
+        templist.append(track['name']) 
+        templist.append(track['album']['images'][1]['url'])
+        templist.append(track['artists'][0]['name'])
+        templist.append(track['id'])
+        tracks.append(templist)
 
-
-
-
-    # topartists = userartists['items']
-    # artists=[]
-    # toptracks = usertracks['items']
-    # tracks=[]
-    # for artist in topartists:
-    #     templist = []
-    #     templist.append(artist['name']) 
-    #     templist.append(artist['images'][2]['url'])
-    #     templist.append(artist['external_urls']['spotify'])
-    #     artists.append(templist)
-    # for track in toptracks:
-    #     templist = []
-    #     templist.append(track['name']) 
-    #     templist.append(track['album']['images'][1]['url'])
-    #     templist.append(track['artists'][0]['name'])
-    #     templist.append(track['id'])
-    #     tracks.append(templist)
+    return render(request, 'spotify_stats.html', {'artists': artists, 'tracks': tracks})
 

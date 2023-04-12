@@ -9,8 +9,13 @@ from .models import Comment, Review, CommentReply
 from django.http import JsonResponse
 from django.core.paginator import Paginator
 from django.contrib import messages
+from country_converter import CountryConverter
+from django.urls import reverse
 import pycountry
-
+import requests
+import datetime
+from datetime import datetime, timedelta
+import csv
 
 # Create your views here.
 def authentication():
@@ -127,18 +132,26 @@ def trendingSongs(request):
 
     country_codes = sp.available_markets()['markets']
     
-    countries = []
- 
-    for code in country_codes:
-        country  = pycountry.countries.get(alpha_2=code)
-        if country is not None:
-            templist = []
-            templist.append(country.name)
-            templist.append(code)
-            countries.append(templist)
-        
-    
-    countries = sorted(countries, key=lambda x: x[0])
+    countries = CountryConverter().convert(names=country_codes, to='name_short')
+
+
+    finalcountries =[]
+
+    for i in range(len(country_codes)):
+        if countries[i] == "Türkiye":
+            countries[i] = "Turkey"
+        if countries[i] == "United States":
+            countries[i] = "USA"
+
+        finalcountries.append([country_codes[i],countries[i]])
+    # for code in country_codes:
+    #     country  = pycountry.countries.get(alpha_2=code)
+    #     if country is not None:
+    #         country = country.name 
+    #         templist = []
+    #         templist.append(country)
+    #         templist.append(code)
+    #         countries.append(templist)   
 
     top_songsGlobalURI = 'spotify:playlist:37i9dQZEVXbMDoHDwVN2tF'
     
@@ -150,20 +163,178 @@ def trendingSongs(request):
         top_songsResults = sp.next(top_songsResults)
         topsongs.extend(top_songsResults['items'])
 
-    return render(request, 'trendingSongs.html', { 'genras': genras, 'countries': countries, 'topsongs': topsongs})
 
 
-def searchPlaylist(request):
+    results = sp.search(q='top afropop', type='playlist', limit=1)
+   
+   
+
+
+       
+    # categories = sp.categories(country='US', limit=50)['categories']['items']
+    # print({category['name']: category['id'] for category in categories})
+
+    return render(request, 'trendingSongs.html', { 'genras': genras, 'countries': finalcountries, 'topsongs': topsongs})
+
+
+def newReleases(request):
+
+    sp = authentication()
+
+    genras = ['test']
+    country_codes = sp.available_markets()['markets']
+    
+    countries = CountryConverter().convert(names=country_codes, to='name_short')
+
+    finalcountries =[]
+
+    for i in range(len(country_codes)):
+        if countries[i] == "Türkiye":
+            countries[i] = "Turkey"
+        if countries[i] == "United States":
+            countries[i] = "USA"
+               
+        finalcountries.append([country_codes[i],countries[i]])
+
+    new_releasesresults = sp.new_releases(limit=50)
+    new_releases = new_releasesresults
+    trackslist =[]
+    for album in new_releases['albums']['items']:
+        if album['album_group'] == "single":
+            
+            tracks = sp.album_tracks(album['id'])
+            id = tracks['items'][0]['id']
+            track = {
+                'name': album['name'],
+                'artist': album['artists'][0]['name'],
+                'url': 'main:songdetail',
+                'id': id,
+                'image': album['images'][2]['url'] if album['images'] else None
+            }
+            trackslist.append(track)
+        else:
+           
+            track = {
+                'name': album['name'],
+                'artist': album['artists'][0]['name'],
+                'url': 'main:album_detail',
+                'id': album['id'],
+                'albumimage': album['images'][2]['url'] if album['images'] else None,
+                'albumname': album['name'],
+                'image': album['images'][2]['url'] if album['images'] else None
+            }
+            trackslist.append(track)
+
+    
+    
+    return render(request, 'newReleases.html', {'genres': genras, 'countries':finalcountries, 'tracks': trackslist})
+
+def albumDetail(request, album_id):
+    sp = authentication()
+    tracks = sp.album_tracks(album_id)
+    album_image = request.GET.get('album_image')
+    album_name = request.GET.get('album_name')
+    trackslist =[]
+    for track in tracks['items']:
+        
+        artist = track['artists'][0]['name']
+        if len(track['artists']) > 1:
+            artists= []
+            for artist in track['artists']:
+                artists.append(artist['name'])
+            artist = ', '.join(artists)        
+        track = {
+            'name': track['name'],
+            'artist': artist,
+            'id': track['id'],
+            'image': album_image
+        }
+        trackslist.append(track)
+    return render(request, 'albumdetail.html', {'tracks': trackslist, 'album_name':album_name})
+
+
+def getNewReleases(request):
+    sp = authentication()
+
+
+    country = request.GET.get('country')
+    genre = request.GET.get('genre')
+    type = request.GET.get('type')
+    print(country)
+    
+   
+    if country == "global":
+        new_releases = sp.new_releases(limit=50)
+        trackslist =[]
+        for album in new_releases['albums']['items']:
+            if album['album_group'] == "single":
+                
+                tracks = sp.album_tracks(album['id'])
+                id = tracks['items'][0]['id']
+                track = {
+                    'name': album['name'],
+                    'artist': album['artists'][0]['name'],
+                    'url': reverse('main:songdetail', args=[id]),
+                    'id': id,
+                    'image': album['images'][2]['url'] if album['images'] else None
+                }
+                trackslist.append(track)
+            else:
+                track = {
+                    'name': album['name'],
+                    'artist': album['artists'][0]['name'],
+                    'url': reverse('main:album_detail', args=[album['id']]),
+                    'id': album['id'],
+                    'albumimage': album['images'][2]['url'] if album['images'] else None,
+                    'albumname': album['name'],
+                    'image': album['images'][2]['url'] if album['images'] else None
+                }
+                trackslist.append(track)
+        response_data = {'tracks': trackslist}
+        return JsonResponse(response_data)
+    else:
+        new_releases = sp.new_releases(country=country, limit=50)
+        trackslist =[]
+        for album in new_releases['albums']['items']:
+            if album['album_group'] == "single":
+                
+                tracks = sp.album_tracks(album['id'])
+                id = tracks['items'][0]['id']
+                track = {
+                    'name': album['name'],
+                    'artist': album['artists'][0]['name'],
+                    'url': reverse('main:songdetail', args=[id]),
+                    'id': id,
+                    'image': album['images'][2]['url'] if album['images'] else None
+                }
+                trackslist.append(track)
+            else:
+                track = {
+                    'name': album['name'],
+                    'artist': album['artists'][0]['name'],
+                    'url': reverse('main:album_detail', args=[album['id']]),
+                    'id': album['id'],
+                    'albumimage': album['images'][2]['url'] if album['images'] else None,
+                    'albumname': album['name'],
+                    'image': album['images'][2]['url'] if album['images'] else None
+                }
+                trackslist.append(track)
+
+        # Do something with the selected values
+        response_data = {'tracks': trackslist}
+
+        return JsonResponse(response_data)
+
+
+def getTrendinSongs(request):
     sp = authentication()
 
     category_id = 'toplists'
     country_code = request.GET.get('countryCode')
     country_name = request.GET.get('countryName')
     print(country_name, country_code)
-    
 
     # Get the playlists for the "Top Lists" category in the given country
-    
 
     if country_name == "The World":
         top_songsGlobalURI = 'spotify:playlist:37i9dQZEVXbMDoHDwVN2tF'
@@ -196,11 +367,10 @@ def searchPlaylist(request):
     # Filter the playlists by name and owner
         for playlist in playlists['playlists']['items']:
             
-            
             if "Your daily update of the most played tracks right now - "+ country_name in playlist['description']:
+                print(playlist)
                 playlistresults = sp.playlist_tracks(playlist['id'])
                 playlistitem = playlistresults['items']
-                
                 
                 while playlistresults['next']:
                     playlistresults = sp.next(playlistresults)
@@ -216,7 +386,7 @@ def searchPlaylist(request):
                         'name': track['track']['name'],
                         'artist': track['track']['artists'][0]['name'],
                         'id': track['track']['id'],
-                        'image': track['track']['album']['images'][2]['url'] if track['track']['album']['images'] else None
+                        'image': track['track']['album']['images'][1]['url'] if track['track']['album']['images'] else None
                     }
                     tracks.append(track)
 
@@ -228,6 +398,11 @@ def searchPlaylist(request):
         return JsonResponse({'tracks': tracks})
 
  
+def trendingGenras(request):
+
+
+    return
+
 
 
 def toggle_comment_reaction(request):
