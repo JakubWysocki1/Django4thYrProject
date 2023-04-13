@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% load static %}
+{% load crispy_forms_tags %}
+{% block content %}
+<div class="container">
+    <div class="container mt-3 border">
+        {% for category in forumcategories %}
+        <div class="col-md border-bottom pt-4">
+            <div class="row pl-2">
+                <h3><a href="{% url 'forum:categoryposts' category.name %}">{{category.name}}</a></h3>
+            </div>
+            <div class="row pl-4">
+                <p id="category_description">{{category.description}}</p>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    <div class="container mt-3 border">
+        <div class="col-md border-bottom pt-4">
+            <h3>Rules</h3>
+        </div>
+        
+    </div>
+</div>
+
+{% endblock %}

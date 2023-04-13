@@ -264,66 +264,39 @@ def getNewReleases(request):
     
    
     if country == "global":
-        new_releases = sp.new_releases(limit=50)
-        trackslist =[]
-        for album in new_releases['albums']['items']:
-            if album['album_group'] == "single":
-                
-                tracks = sp.album_tracks(album['id'])
-                id = tracks['items'][0]['id']
-                track = {
-                    'name': album['name'],
-                    'artist': album['artists'][0]['name'],
-                    'url': reverse('main:songdetail', args=[id]),
-                    'id': id,
-                    'image': album['images'][2]['url'] if album['images'] else None
-                }
-                trackslist.append(track)
-            else:
-                track = {
-                    'name': album['name'],
-                    'artist': album['artists'][0]['name'],
-                    'url': reverse('main:album_detail', args=[album['id']]),
-                    'id': album['id'],
-                    'albumimage': album['images'][2]['url'] if album['images'] else None,
-                    'albumname': album['name'],
-                    'image': album['images'][2]['url'] if album['images'] else None
-                }
-                trackslist.append(track)
-        response_data = {'tracks': trackslist}
-        return JsonResponse(response_data)
-    else:
-        new_releases = sp.new_releases(country=country, limit=50)
-        trackslist =[]
-        for album in new_releases['albums']['items']:
-            if album['album_group'] == "single":
-                
-                tracks = sp.album_tracks(album['id'])
-                id = tracks['items'][0]['id']
-                track = {
-                    'name': album['name'],
-                    'artist': album['artists'][0]['name'],
-                    'url': reverse('main:songdetail', args=[id]),
-                    'id': id,
-                    'image': album['images'][2]['url'] if album['images'] else None
-                }
-                trackslist.append(track)
-            else:
-                track = {
-                    'name': album['name'],
-                    'artist': album['artists'][0]['name'],
-                    'url': reverse('main:album_detail', args=[album['id']]),
-                    'id': album['id'],
-                    'albumimage': album['images'][2]['url'] if album['images'] else None,
-                    'albumname': album['name'],
-                    'image': album['images'][2]['url'] if album['images'] else None
-                }
-                trackslist.append(track)
+        country = 'Any'
 
-        # Do something with the selected values
-        response_data = {'tracks': trackslist}
+    new_releases = sp.new_releases(country=country, limit=50)
+    trackslist =[]
+    for album in new_releases['albums']['items']:
+        if album['album_group'] == "single":
+            
+            tracks = sp.album_tracks(album['id'])
+            id = tracks['items'][0]['id']
+            track = {
+                'name': album['name'],
+                'artist': album['artists'][0]['name'],
+                'url': reverse('main:songdetail', args=[id]),
+                'id': id,
+                'image': album['images'][2]['url'] if album['images'] else None
+            }
+            trackslist.append(track)
+        else:
+            track = {
+                'name': album['name'],
+                'artist': album['artists'][0]['name'],
+                'url': reverse('main:album_detail', args=[album['id']]),
+                'id': album['id'],
+                'albumimage': album['images'][2]['url'] if album['images'] else None,
+                'albumname': album['name'],
+                'image': album['images'][2]['url'] if album['images'] else None
+            }
+            trackslist.append(track)
 
-        return JsonResponse(response_data)
+    # Do something with the selected values
+    response_data = {'tracks': trackslist}
+
+    return JsonResponse(response_data)
 
 
 def getTrendinSongs(request):

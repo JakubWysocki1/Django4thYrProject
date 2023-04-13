@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'accounts',
     'main',
+    'forum',
     'crispy_forms',
     'crispy_bootstrap4',
     
@@ -64,7 +65,8 @@ TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
         'DIRS': [str(BASE_DIR.joinpath('accounts', 'templates')),
-                 str(BASE_DIR.joinpath('main', 'templates'))],
+                 str(BASE_DIR.joinpath('main', 'templates')),
+                 str(BASE_DIR.joinpath('forum', 'templates'))],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
