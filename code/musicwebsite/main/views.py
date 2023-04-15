@@ -167,8 +167,6 @@ def trendingSongs(request):
 
     results = sp.search(q='top afropop', type='playlist', limit=1)
    
-   
-
 
        
     # categories = sp.categories(country='US', limit=50)['categories']['items']
@@ -264,7 +262,7 @@ def getNewReleases(request):
     
    
     if country == "global":
-        country = 'Any'
+        country = None
 
     new_releases = sp.new_releases(country=country, limit=50)
     trackslist =[]

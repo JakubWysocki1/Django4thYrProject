@@ -1,4 +1,9 @@
 
+body{
+    max-width: auto;
+    word-wrap: break-word;
+}
+
 tr a:hover {
     text-decoration: none;
     color: blue;
@@ -103,7 +108,7 @@ tr a:hover {
 }
 
 
-#editButton, #deleteButton {
+#editButton, #deleteButton{
     padding: 0px;
     padding-right: 5px;
     padding-left: 0px;
@@ -185,9 +190,45 @@ tr a:hover {
     padding-left: 220px;
 }
 
+#timeposted{
+    font-size: x-small;
+    padding-top: 16px;
+}
+
+#deleteTopic, #editTopic{
+    padding: 0px;
+    padding-right:0px;
+    padding-left: 0px;
+    margin: 0px;
+    border: 0;
+    background-color: none;
+    text-decoration: none;
+}
+
+
+td {
+    max-width: 350px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+@media (max-width: 1200px){
+    #forum-category{
+        padding-left: 190px;
+    }
+
+}
+
+
 @media (max-width: 1024px) {
     #forum-category{
         padding-left: 150px;
+    }
+
+    #timeposted{
+        font-size: x-small; 
+        padding-top: 5px;
     }
 }
 
@@ -195,7 +236,27 @@ tr a:hover {
 @media (max-width: 768px) {
     #forum-category{
         padding-left: 5px;
+
     }
+
+    #timeposted{
+        font-size: x-small;
+        padding-top: 5px;
+    }
+
+    #postopic{
+        padding-left: 20px;
+    }
+
+    td {
+        max-width: 200px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
 }
+
+/* Post */
+
 
 
