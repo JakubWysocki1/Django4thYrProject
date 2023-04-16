@@ -24,6 +24,7 @@ def categoryposts(request, category_name):
     for post in forumpost:
         post.time_since_created = timesince(post.created_at, now)
 
+    
     forumpostform = ForumPostForm()
     editform = ForumPostForm()
 

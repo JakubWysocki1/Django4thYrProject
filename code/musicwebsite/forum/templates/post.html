@@ -8,7 +8,7 @@
             <h1 id="posttitle">{{post.title}}</h1>
             <img id="imageprofile" src="{{ post.user.userprofile.profile_picture.url }}">
             <p><a href="{% url 'accounts:profile' post.user %}">{{post.user}}</a></p>
-            <p>{{post.body}}</p>
+            <p>{{post.body |linebreaksbr}}</p>
         </div>
     </div>
 

@@ -66,7 +66,7 @@
                 {% if post.user == request.user %}
                   <td>
                     <div class="col">
-                      <button id="editTopic" type="button" class="btn btn-link btn-sm" data-toggle="modal" data-target="#editTopic{{post.id}}"onclick="populateEditForm('{{post.id}}', '{{post.body}}', '{{post.title}}')"><small>
+                      <button id="editTopic" type="button" class="btn btn-link btn-sm" data-toggle="modal" data-target="#editTopic{{post.id}}"onclick="populateEditForm('{{post.id}}', '{{post.body|linebreaksbr}}', '{{post.title|linebreaksbr}}')"><small>
                         Edit
                       </small>
                       </button>
@@ -113,7 +113,7 @@
                             <div class="modal-body">
                                 <form id="edit-form-{{post.id}}" method="POST" action="{% url 'forum:categoryposts' post.category %}">
                                     {% csrf_token %}
-                                    {{ editpost| crispy }}
+                                    <p>{{ editpost| crispy }}</p>
                                     <input type="hidden" name="editTopic" value="{{post.id}}">
                                 </form>
                             </div>
@@ -148,11 +148,16 @@ setTimeout(() => {
 }, 3000);
 
 function populateEditForm(postId, postText, postTitle) {
-        var editForm = document.getElementById("editTopic" + postId);
-        var postInput = editForm.querySelector("textarea[name='body']");
-        var postInput2 = editForm.querySelector("input[type='text'][name='title']");
-        postInput.value = postText;
-        postInput2.value = postTitle;
-    }
+    console.error()
+    var editForm = document.getElementById("editTopic" + postId);
+    var postInput = editForm.querySelector("textarea[name='body']");
+    var postInput2 = editForm.querySelector("input[type='text'][name='title']");
+
+    // Replace any "\r\n" or "\n" characters with the HTML entity for a line break.
+    postText = postText.replace(/<br>/g, '\n');
+
+    postInput.value = postText;
+    postInput2.value = postTitle;
+}
 </script>
 {% endblock %}

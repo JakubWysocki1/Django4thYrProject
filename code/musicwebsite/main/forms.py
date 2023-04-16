@@ -1,5 +1,6 @@
 from django import forms
-from .models import Comment, CommentReply
+from .models import Comment, CommentReply, Review
+from django.core.validators import MinValueValidator, MaxValueValidator
 
 class CommentForm(forms.ModelForm):
 

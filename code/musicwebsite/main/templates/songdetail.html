@@ -26,14 +26,65 @@
                 </div>
             </div>
         
-            <div class="col-sm-5">
+            <div class="col-lg-7">
                 <div id="trackDetailInfo">
+                    <div class="row">
+                        <div>
+                            <h1 id="songname" class="pl-2">{{songinfo.name}}</h1>
+                            <p id="artist" class="pl-2">By {{songinfo.artists.0.name}}</p>
+                        </div>
+                        <i id="staricon" class="fa fa-star fa-2x pr-2"></i>
+                        <div class="rating">
+                          <h3 id="avg_rating">{{average_rating}}/10</h3>
+                          <small id="rating_count">reviews: {{rating_count}}</small>
+                        </div>
+                        
+                        <div id="add_review">
+                            {% if user.is_authenticated %}
+                            <button id="addReview" type="button" class="btn btn-link btn-sm" data-toggle="modal" data-target="#addReview{{songinfo.id}}">
+                                Add Rating
+                            </button>
+                            <div class="modal fade" id="addReview{{songinfo.id}}" tabindex="-1" role="dialog" aria-labelledby="addReviewLabel" aria-hidden="true">
+                            <div class="modal-dialog modal-dialog-centered" role="document">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title" id="addReviewLabel">Add Rating</h5>
+                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                            <span aria-hidden="true">&times;</span>
+                                        </button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <div id="rating-container">
+                                          {% for i in "123456789"|make_list %}
+                                            <button id="number{{ i }}" type="button" class="btn btn-outline-primary" onclick="setRating('{{i}}')">{{ i }}</button>
+                                          {% endfor %}
+                                          <button id="number10" type="button" class="btn btn-outline-primary" onclick="setRating(10)">10</button>
+                                          <form id="add-rating-form" method="POST" style="display:none;">
+                                            {% csrf_token %}
+                                            <input type="hidden" name="addRating" id="rating-input">
+                                          </form>
+                                        </div>
+                                      </div>
+                                      
+                                      <div class="modal-footer">
+                                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                                        <button type="submit" class="btn btn-primary" onclick="event.preventDefault(); document.getElementById('add-rating-form').submit();">Add</button>
+                                      </div>
+                                </div>
+                            </div>
+                            </div>
+                            {% else %}
+                              Login to add review
+                            {% endif %}
+                        </div>
+                          
+                    </div>
                     
-                    <h1>{{songinfo.name}}</h1>
-                    <p>By {{songinfo.artists.0.name}}</p>
+                    
                     <li>Popularity {{songinfo.popularity}}/100</li>
                     <li>Released: {{songinfo.album.release_date}}</li>
                     <li><a href="{{songinfo.external_urls.spotify}}">Open in Spotify</a></li>
+            
                 </div>
             </div>
         </div>
@@ -72,7 +123,7 @@
                                     <span class="dislikecount" id="dislikes-{{ comment.id }}">{{ comment.dislikes }}</span>
                                 </div>
                                 {% if comment.user == request.user %}
-                                    <button id="editButton" type="button" class="btn btn-link btn-sm pl-2" data-toggle="modal" data-target="#editComment{{comment.id}}" onclick="populateEditForm('{{comment.id}}', '{{comment.text}}')">
+                                    <button id="editButton" type="button" class="btn btn-link btn-sm pl-2" data-toggle="modal" data-target="#editComment{{comment.id}}" onclick="populateEditForm('{{comment.id}}', '{{comment.text|linebreaksbr}}')">
                                         Edit
                                     </button>
                                     <button id="deleteButton" type="button" class="btn btn-link btn-sm" data-toggle="modal" data-target="#deleteComment{{comment.id}}">
@@ -185,7 +236,7 @@
                             <span>
                             {% if reply.user == request.user %}
                                 <span class="pl-3">
-                                    <button id="editButton-{{reply.id}}" type="button" class="btn btn-link btn-sm" data-toggle="modal" data-target="#editReply-{{reply.id}}" onclick="populateEditForm('{{reply.id}}', '{{reply.text}}')">Edit
+                                    <button id="editButton-{{reply.id}}" type="button" class="btn btn-link btn-sm" data-toggle="modal" data-target="#editReply-{{reply.id}}" onclick="populateEditForm('{{reply.id}}', '{{reply.text|linebreaksbr}}')">Edit
                                     </button>
                                     <button id="deleteButton-{{reply.id}}" type="button" class="btn btn-link btn-sm" data-toggle="modal" data-target="#deleteReply-{{reply.id}}">Delete
                                     </button>
@@ -284,13 +335,14 @@ volumeSlider.addEventListener('input', function() {
   audioPlayer.volume = volumeSlider.value;
 });
 
-    playPauseButton.addEventListener('click', togglePlayPause);
-     
-    function populateEditForm(commentId, commentText) {
-        var editForm = document.getElementById("edit-form-" + commentId);
-        var commentInput = editForm.querySelector("textarea[name='text']");
-        commentInput.value = commentText;
-    }
+playPauseButton.addEventListener('click', togglePlayPause);
+    
+function populateEditForm(commentId, commentText) {
+    var editForm = document.getElementById("edit-form-" + commentId);
+    var commentInput = editForm.querySelector("textarea[name='text']");
+    commentText = commentText.replace(/<br>/g, '');
+    commentInput.value = commentText;
+}
 
 
 function toggleCommentReaction(comment_id, reaction_type) {
@@ -350,6 +402,18 @@ if (repliesDiv.style.display === "none") {
 }
 }
 
-
+function setRating(rating) {
+  document.getElementById("rating-input").value = rating;
+  var buttons = document.querySelectorAll("#rating-container button");
+  for (var i = 0; i < buttons.length; i++) {
+    if (buttons[i].id === "number" + rating) {
+      buttons[i].classList.add("btn-primary");
+      buttons[i].classList.remove("btn-outline-primary");
+    } else {
+      buttons[i].classList.add("btn-outline-primary");
+      buttons[i].classList.remove("btn-primary");
+    }
+  }
+}
 </script>
 {% endblock %}

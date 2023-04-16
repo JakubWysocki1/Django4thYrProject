@@ -11,16 +11,16 @@ from django.core.paginator import Paginator
 from django.contrib import messages
 from country_converter import CountryConverter
 from django.urls import reverse
-import pycountry
 import requests
-import datetime
+from django.conf import settings
 from datetime import datetime, timedelta
-import csv
+from django.core.validators import MinValueValidator, MaxValueValidator
+from django.db.models import Avg
 
 # Create your views here.
 def authentication():
-    sp = spotipy.Spotify(auth_manager=SpotifyClientCredentials(client_id="a2be13064936401992b518216aade28c",
-                                                           client_secret="ef320547195a4b80b5fe92c931486723"))
+    sp = spotipy.Spotify(auth_manager=SpotifyClientCredentials(client_id=settings.SPOTIPY_CLIENT_ID,
+                                                           client_secret=settings.SPOTIPY_CLIENT_SECRET))
     
     return sp
 
@@ -63,10 +63,17 @@ def song_detail(request, song_id):
     comment_count = comments.count()
 
     ratings = Review.objects.filter(song_id=song_id)
+    if ratings.exists():
+        average_rating = round(ratings.aggregate(Avg('rating'))['rating__avg'], 1)
+    else:
+        average_rating = "-"
+    rating_count = ratings.count()
+
     form = CommentForm()
     editform = CommentForm()
     replyform = ReplyForm()
     editreplyform = EditReplyForm()
+   
 
     if request.method == 'POST':
         if 'addComment' in request.POST:
@@ -121,8 +128,20 @@ def song_detail(request, song_id):
                 editreplyform.save()
                 messages.success(request, 'Reply Updated!')
                 return redirect('main:songdetail', song_id=song_id)
+
+        elif 'addRating' in request.POST:
+            ratingVal = request.POST.get('addRating')
+            if ratingVal:
+                rating = Review.objects.create(
+                user=request.user,
+                song_id=song_id,
+                rating=ratingVal,)
+            messages.success(request, 'Rating Added!')
+            return redirect('main:songdetail', song_id=song_id)
             
-    return render(request, 'songdetail.html', {'songinfo': songinfo, 'form': form, 'comments': comments, 'comment_count': comment_count, 'editform': editform, 'replyform': replyform, 'editreplyform': editreplyform})
+    return render(request, 'songdetail.html', {'songinfo': songinfo, 'form': form, 'comments': comments, 
+                                               'comment_count': comment_count, 'editform': editform, 'replyform': replyform, 
+                                               'editreplyform': editreplyform, 'average_rating': average_rating, 'rating_count':rating_count,})
 
 def trendingSongs(request):
     sp = authentication()
