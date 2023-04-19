@@ -33,12 +33,15 @@
                             <h1 id="songname" class="pl-2">{{songinfo.name}}</h1>
                             <p id="artist" class="pl-2">By {{songinfo.artists.0.name}}</p>
                         </div>
-                        <i id="staricon" class="fa fa-star fa-2x pr-2"></i>
-                        <div class="rating">
-                          <h3 id="avg_rating">{{average_rating}}/10</h3>
-                          <small id="rating_count">reviews: {{rating_count}}</small>
+                        <a id="ratingbtn" href="{% url 'main:rating_stats' songinfo.id %}" class="btn btn-outline-dark">
+                        <div class="row">
+                            <i id="staricon" class="fa fa-star fa-2x pr-2"></i>
+                            <div class="rating">
+                            <h3 id="avg_rating">{{average_rating}}/10</h3>
+                            <small id="rating_count">reviews: {{rating_count}}</small>
+                            </div>
                         </div>
-                        
+                        </a>
                         <div id="add_review">
                             {% if user.is_authenticated %}
                             <button id="addReview" type="button" class="btn btn-link btn-sm" data-toggle="modal" data-target="#addReview{{songinfo.id}}">

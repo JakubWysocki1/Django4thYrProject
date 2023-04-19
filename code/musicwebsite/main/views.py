@@ -16,6 +16,7 @@ from django.conf import settings
 from datetime import datetime, timedelta
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db.models import Avg
+import json
 
 # Create your views here.
 def authentication():
@@ -388,10 +389,29 @@ def getTrendinSongs(request):
         return JsonResponse({'tracks': tracks})
 
  
-def trendingGenras(request):
+def ratingStats(request, song_id):
+    sp = authentication()
+
+    songinfo = sp.track(song_id)
 
 
-    return
+    ratings = Review.objects.filter(song_id=song_id)
+    ratings_dict = {i: 0 for i in range(1, 11)}  # initialize counts to 0 for all possible ratings (1-10)
+
+    # Count the ratings
+    for review in ratings:
+        rating = review.rating
+        ratings_dict[rating] += 1
+
+    # Convert the ratings count to a list of dictionaries
+    ratings_list = [{'rating': rating, 'votes': count} for rating, count in ratings_dict.items()]
+
+    # Sort the ratings list by descending order of votes
+    ratings_list.sort(key=lambda x: x['rating'], reverse=True)
+    ratings_json = json.dumps(ratings_list)
+
+    return render(request, "ratingStats.html", {'ratings': ratings_json, 'songinfo': songinfo})
+
 
 
 

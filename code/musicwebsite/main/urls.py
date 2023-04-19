@@ -12,8 +12,9 @@ urlpatterns = [
     path('trendingSongs/', views.trendingSongs, name='trendingSongs'),
     path('search/', views.search_tracks, name='search_tracks'),
     path('searchPlaylist/', views.getTrendinSongs, name='search_playlist'),
-    path('searchGenra/', views.trendingGenras, name='search_genra'),
+    # path('searchGenra/', views.trendingGenras, name='search_genra'),
     path('newReleases/', views.newReleases, name='new_releases'),
     path('getNewReleases/', views.getNewReleases, name='get_new_releases'),     
     path('albumDetail/<str:album_id>', views.albumDetail, name='album_detail'),
+    path('songs/<str:song_id>/ratingstats', views.ratingStats, name='rating_stats'),
 ] 

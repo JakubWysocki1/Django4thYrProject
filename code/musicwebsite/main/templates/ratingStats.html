@@ -1,0 +1,130 @@
+{% extends "base.html" %}
+{% load static %}
+{% load crispy_forms_tags %}
+{% block content %}
+<div class="container">
+  <div class="container bg-light">
+    <div class="row pl-5 pt-4 pb-4 mb-4">
+      <img class="mr-3" id="songratingimg" src="{{ songinfo.album.images.1.url }}" alt="{{ songinfo.name }}">
+      <div>
+      <h1 id="songname" class="pl-2">{{songinfo.name}}</h1>
+      <p id="artist" class="pl-2">By {{songinfo.artists.0.name}}</p>
+      </div>
+    </div>
+
+
+    <div class="chartMenu ml-4 pb-5">
+        <div class="chartCard">
+          <div class="chartBox">
+            <canvas id="myChart"></canvas>
+          </div>
+        </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
+<script>
+    
+
+
+const ratings = JSON.parse('{{ ratings|safe }}');
+const labels = ratings.map(rating => rating.rating);
+const datas = ratings.map(rating => rating.votes);
+
+const data = {
+      labels: labels,
+      datasets: [{
+        label: '',
+        data: datas,
+        backgroundColor: [
+          '#31b053',
+        ],
+        borderWidth: 1,
+        datalabels:{
+          color: 'black',
+          anchor: 'end',
+          align: 'right',
+          font:{
+            size: 10
+          },
+          offset: 7,
+        }
+      }]
+    };
+
+
+    const yScaleText = {
+      id: 'yScaleText',
+      afterDraw(chart, args, options){
+        const {ctx, chartArea:{top}, scales:{x,y} }= chart;
+        ctx.save();
+        ctx.font = `${options.fontSize}px Arial`;
+        ctx.fillStyle = options.fontColor;
+        ctx.fillText(options.title, 0, top - 20);
+        ctx.restore();
+      }
+    };
+
+    // config 
+    const config = {
+      type: 'bar',
+      data,
+      options: {
+        
+        scales: {
+          x:{
+            ticks:{
+                display:false
+            },
+            
+          },
+          y:{
+            ticks:{
+                font:{
+                  size: 20,
+                  
+                },
+            },
+          },
+          responsive: true,
+        },
+        layout: {
+            padding: {
+              left: 30,
+              right: 40,
+            },
+        },
+        indexAxis: 'y',
+        plugins:{
+          yScaleText:{
+            fontColor: 'black',
+            fontSize: 20,
+            title: 'Ratings',
+            
+           
+          },
+          legend: {
+            labels:{
+              boxWidth:0,
+              
+              
+            }
+          },
+        },
+      },
+      plugins: [yScaleText, ChartDataLabels], 
+    };
+
+    // render init block
+    const myChart = new Chart(
+      document.getElementById('myChart'),
+      config
+    );
+
+    // Instantly assign Chart.js version
+  const chartVersion = document.getElementById('chartVersion');
+  chartVersion.innerText = Chart.version;
+</script>
+
+{% endblock %}

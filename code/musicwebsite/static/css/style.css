@@ -165,7 +165,7 @@ tr a:hover {
 #staricon{
     margin-top: 10px;
     color: gold;
-    padding-left: 30px;
+    
     
 }
 #add_review{
@@ -179,6 +179,32 @@ tr a:hover {
 #number:active{
     color: #000;
 }
+
+#ratingbtn{
+    padding: 0px;
+    padding-right: 20px;
+    padding-left: 20px;
+
+    margin: 0px;
+    margin-left: 50px;
+    border:0;
+    border-color: #00000034;
+    
+    height: 90%;
+    line-height: 25px;
+    
+    color: black;
+}
+
+#ratingbtn:focus{
+    outline: none;
+    box-shadow: none;
+}
+
+#ratingbtn:hover{
+    background-color: rgba(128, 128, 128, 0.316);
+}
+
 /* Profile Page*/
 #bioImage {
     max-width: 100px;
@@ -240,7 +266,23 @@ td {
     text-overflow: ellipsis;
   }
 
+
+/* Post */
+
+
+
+/* Rating stats */
+.chartBox{
+    width: 700px;
+}
+
+#songratingimg{
+    max-width: 100px;
+}
+
+
 @media (max-width: 1200px){
+    /* Forum Topics */
     #forum-category{
         padding-left: 120px;
     }
@@ -252,6 +294,7 @@ td {
 
 
 @media (max-width: 1024px) {
+    /* Forum Topics */
     #forum-category{
         padding-left: 80px;
     }
@@ -262,10 +305,12 @@ td {
     }
 
 
+
 }
 
 
 @media (max-width: 768px) {
+    /* Forum Topics */
     #forum-category{
         padding-left: 5px;
 
@@ -290,9 +335,5 @@ td {
       #add_review{
         padding-left: 20px;
     }
+
 }
-
-/* Post */
-
-
-
