@@ -2,7 +2,13 @@
 {% load static %}
 {% load crispy_forms_tags %}
 {% block content %}
-<div class="container">    
+<div class="container">
+    <small>
+        <a href="{% url 'main:home' %}">Home</a>
+        <i class="fas fa-angle-right fa-xs"></i>
+        Trending Songs
+    
+      </small>
     <div class="row justify-content-md-center mt-3">
         <div class="col-md-6">
             <small id="playlistLink" class="my-auto"><a href="https://open.spotify.com/playlist/37i9dQZEVXbMDoHDwVN2tF?si=aa665591baa647ca">Open in Spotify</a></small>

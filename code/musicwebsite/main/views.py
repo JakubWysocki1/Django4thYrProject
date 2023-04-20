@@ -17,6 +17,7 @@ from datetime import datetime, timedelta
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db.models import Avg
 import json
+import statistics
 
 # Create your views here.
 def authentication():
@@ -56,6 +57,20 @@ def search_tracks(request):
 
 def song_detail(request, song_id):
     sp = authentication()
+
+    referer_url = request.META.get('HTTP_REFERER')
+
+    if "trendingSongs" in referer_url:
+        referer_name = "Trending Songs"
+    elif "newReleases" in referer_url:
+        referer_name = "New Releases"
+    elif "albumDetail" in referer_url:
+        referer_name = "Album"
+    elif "ratingstats" in referer_url:
+        referer_name = "Rating Statistics"
+
+    else:
+        referer_name = "?"
 
     uri = 'spotify:track:' + song_id
     songinfo = sp.track(uri)
@@ -142,7 +157,7 @@ def song_detail(request, song_id):
             
     return render(request, 'songdetail.html', {'songinfo': songinfo, 'form': form, 'comments': comments, 
                                                'comment_count': comment_count, 'editform': editform, 'replyform': replyform, 
-                                               'editreplyform': editreplyform, 'average_rating': average_rating, 'rating_count':rating_count,})
+                                               'editreplyform': editreplyform, 'average_rating': average_rating, 'rating_count':rating_count,'refererurl': referer_url, 'referername': referer_name})
 
 def trendingSongs(request):
     sp = authentication()
@@ -268,7 +283,7 @@ def albumDetail(request, album_id):
             'image': album_image
         }
         trackslist.append(track)
-    return render(request, 'albumdetail.html', {'tracks': trackslist, 'album_name':album_name})
+    return render(request, 'albumdetail.html', {'tracks': trackslist, 'album_name':album_name,})
 
 
 def getNewReleases(request):
@@ -399,9 +414,25 @@ def ratingStats(request, song_id):
     ratings_dict = {i: 0 for i in range(1, 11)}  # initialize counts to 0 for all possible ratings (1-10)
 
     # Count the ratings
+    ratings_list = []
     for review in ratings:
         rating = review.rating
+        ratings_list.append(rating)
         ratings_dict[rating] += 1
+
+    print(len(ratings_list))
+
+    if len(ratings_list) == 0:
+        mean_rating = 0
+        mode_rating = 0
+        median_rating = 0
+    else:
+        mean_rating = round(statistics.mean(ratings_list), 1)
+        mode_rating = round(statistics.mode(ratings_list), 1)
+        median_rating = round(statistics.median(ratings_list), 1)
+
+
+    
 
     # Convert the ratings count to a list of dictionaries
     ratings_list = [{'rating': rating, 'votes': count} for rating, count in ratings_dict.items()]
@@ -410,7 +441,7 @@ def ratingStats(request, song_id):
     ratings_list.sort(key=lambda x: x['rating'], reverse=True)
     ratings_json = json.dumps(ratings_list)
 
-    return render(request, "ratingStats.html", {'ratings': ratings_json, 'songinfo': songinfo})
+    return render(request, "ratingStats.html", {'ratings': ratings_json, 'songinfo': songinfo, 'meanrating': mean_rating, 'medianrating': median_rating, 'moderating':mode_rating})
 
 
 

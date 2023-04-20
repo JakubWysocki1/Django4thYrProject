@@ -10,7 +10,17 @@
         {% endfor %}
     </div>
     {% endif %}
+
     <div class="jumbotron">
+        <div id="links" class="row">
+            <small style="width: auto;" class="">
+                <a href="{% url 'main:home' %}">Home</a>
+                <i class="fas fa-angle-right fa-xs"></i>
+                <a href="{{refererurl}}">{{referername}}</a>
+                <i class="fas fa-angle-right fa-xs"></i>
+                {{songinfo.name}}
+            </small>
+        </div>
         <div id="track detail" class="row">
             <div class="col-sm-5 text-sm-right">
                 <div id="imgcontainer">
@@ -38,7 +48,7 @@
                             <i id="staricon" class="fa fa-star fa-2x pr-2"></i>
                             <div class="rating">
                             <h3 id="avg_rating">{{average_rating}}/10</h3>
-                            <small id="rating_count">reviews: {{rating_count}}</small>
+                            <small><p id="rating_count">ratings: {{rating_count}}</p></small>
                             </div>
                         </div>
                         </a>

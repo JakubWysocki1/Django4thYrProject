@@ -3,6 +3,12 @@
 {% load crispy_forms_tags %}
 {% block content %}
 <div class="container">
+  <small>
+    <a href="{% url 'main:home' %}">Home</a>
+    <i class="fas fa-angle-right fa-xs"></i>
+    New Releases
+
+  </small>
     <form id="my-form" method="GET">
         <select class="ml-2" id="country-select" name="country">
           <option default selected value="global">The World</option>

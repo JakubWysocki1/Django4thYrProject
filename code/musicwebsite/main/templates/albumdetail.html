@@ -3,6 +3,11 @@
 {% load crispy_forms_tags %}
 {% block content %}
 <div class="container">
+    <small>
+        <a href="{% url 'main:new_releases' %}">New Releases</a>
+        <i class="fas fa-angle-right fa-xs"></i>
+        {{album_name}}
+    </small>
     <div class="col-md-6 pt-4"> 
         <h1>{{album_name}}</h1>
         <div id="results">

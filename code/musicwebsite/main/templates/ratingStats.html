@@ -3,8 +3,12 @@
 {% load crispy_forms_tags %}
 {% block content %}
 <div class="container">
-  <div class="container bg-light">
-    <div class="row pl-5 pt-4 pb-4 mb-4">
+  <div class="container bg-light ">
+    <small><a href="{% url 'main:songdetail' songinfo.id %}">{{songinfo.name}}</a>
+    <i class="fas fa-angle-right fa-xs"></i>
+    Rating Statistics
+    </small>
+    <div id="songratinginfo" class="row pt-5 pb-4 mb-4">
       <img class="mr-3" id="songratingimg" src="{{ songinfo.album.images.1.url }}" alt="{{ songinfo.name }}">
       <div>
       <h1 id="songname" class="pl-2">{{songinfo.name}}</h1>
@@ -13,12 +17,17 @@
     </div>
 
 
-    <div class="chartMenu ml-4 pb-5">
+    <div class="d-flex justify-content-md-center chartMenu ml-4 pb-5">
         <div class="chartCard">
           <div class="chartBox">
             <canvas id="myChart"></canvas>
           </div>
         </div>
+    </div>
+    <div class="row d-flex justify-content-md-center">
+      <h3 class="pr-5">Mode: {{moderating}}</h3>
+      <h3 class="pr-5">Mean: {{meanrating}}</h3>
+      <h3>Median: {{medianrating}}</h3>
     </div>
   </div>
 </div>
