@@ -22,12 +22,12 @@
         <div id=""  style="border-left:1px solid #dadada;height:90%"class="col-md-6">
             <h1 class="pb-2 pl-2">Your all-time Top Tracks</h1>
             {% for track in tracks %}
-                <div class="row">
+                <div class="row pb-3">
                     <div class="col-md-3 text-md-right">
-                        <img id="spotifystatsimg" src="{{track.1}}">
+                        <img id="trackImg" src="{{track.1}}">
                     </div>
                     <div class="col-md-9 my-auto">
-                        <h3><a href="{% url 'main:songdetail' song_id=track.3 %}">{{forloop.counter}}. {{track.0}}</a></h3> 
+                        <h4><a href="{% url 'main:songdetail' song_id=track.3 %}">{{forloop.counter}}. {{track.0}}</a></h4> 
 
                     </div>
                 </div>

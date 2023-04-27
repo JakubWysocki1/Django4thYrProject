@@ -3,11 +3,17 @@
 {% load crispy_forms_tags %}
 {% block content %}
 <div class="container">
+  {% if invalid_id %}
+    <div class="pt-2">
+    {{invalid_id}}
+    </div>
+  {% else %}
   <div class="container bg-light ">
     <small><a href="{% url 'main:songdetail' songinfo.id %}">{{songinfo.name}}</a>
     <i class="fas fa-angle-right fa-xs"></i>
     Rating Statistics
     </small>
+
     <div id="songratinginfo" class="row pt-5 pb-4 mb-4">
       <img class="mr-3" id="songratingimg" src="{{ songinfo.album.images.1.url }}" alt="{{ songinfo.name }}">
       <div>
@@ -30,6 +36,7 @@
       <h3>Median: {{medianrating}}</h3>
     </div>
   </div>
+  {% endif %}
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>

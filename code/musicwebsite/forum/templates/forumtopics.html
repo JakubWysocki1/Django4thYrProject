@@ -8,38 +8,42 @@
         <i class="fas fa-angle-right fa-xs"></i>
         Forum
     </small>
-    <div class="container mt-3 border">
-        {% for category in forumcategories %}
-        <div class="col-md border-bottom pt-4">
-            <div class="row pl-2">
-                <h3><a href="{% url 'forum:categoryposts' category.name %}">{{category.name}}</a></h3>
+    {% if invalid_id %}
+        <p>{{invalid_id}}</p>
+    {% else %}
+        <div class="container mt-3 border">
+            {% for category in forumcategories %}
+            <div class="col-md border-bottom pt-4">
+                <div class="row pl-2">
+                    <h3><a href="{% url 'forum:categoryposts' category.name %}">{{category.name}}</a></h3>
+                </div>
+                <div class="row pl-4">
+                    <p id="category_description">{{category.description}}</p>
+                </div>
             </div>
-            <div class="row pl-4">
-                <p id="category_description">{{category.description}}</p>
-            </div>
+            {% endfor %}
         </div>
-        {% endfor %}
-    </div>
-    <div class="container mt-3 border">
-        <div class="col-md pt-4">
-            <div class="row border-bottom mb-3 pb-2">
-                <h3>RULES:</h3>
-            </div>
-            <div class="row pb-3 border-bottom">
-                <ul>
-                    <li>Be respectful towards others at all times, and refrain from using insulting language or engaging in personal attacks.</li>
-                    <li>Avoid spamming the forum with referral links, first-post hunting, irrelevant comments, stats, or other forms of unsolicited promotion.</li>
-                    <li>Do not troll or engage in any behavior that is intended to provoke or bait other members.</li>
-                    <li>English only.</li>
-                </ul>
+        <div class="container mt-3 border">
+            <div class="col-md pt-4">
+                <div class="row border-bottom mb-3 pb-2">
+                    <h3>RULES:</h3>
+                </div>
+                <div class="row pb-3 border-bottom">
+                    <ul>
+                        <li>Be respectful towards others at all times, and refrain from using insulting language or engaging in personal attacks.</li>
+                        <li>Avoid spamming the forum with referral links, first-post hunting, irrelevant comments, stats, or other forms of unsolicited promotion.</li>
+                        <li>Do not troll or engage in any behavior that is intended to provoke or bait other members.</li>
+                        <li>English only.</li>
+                    </ul>
 
 
+                </div>
+                
             </div>
+
             
         </div>
-
-        
-    </div>
+    {% endif %}
 </div>
 
 {% endblock %}

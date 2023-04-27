@@ -9,70 +9,80 @@
     New Releases
 
   </small>
-    <form id="my-form" method="GET">
+  <div class="mt-3 ml-2">
+      <h1 id="newIn" class="pb-2">New Songs in The World</h1>
+      <div class="row ml-2">
+        Select a Country
         <select class="ml-2" id="country-select" name="country">
           <option default selected value="global">The World</option>
           {% for country in countries %}
           <option value="{{ country.0 }}">{{ country.1 }}</option>
           {% endfor %}
         </select>  
-        <select id="genra-select" class="ml-2" name="genre">
-          <option selected>None</option>
-          {% for genre in genres %}
-          <option value="{{ genre }}">{{ genre }}</option>
-          {% endfor %}
-        </select>  
-        <button id="submit-button" type="submit" onclick="submitFormData(event)">Show</button>
-    </form>
-    <div class="col-md-6 pt-4"> 
-        <div id="results">
-            {% for track in tracks %}
-            <div class="row pb-3">
-                <div class="col-md-3">
-                    <img id="trackImg" src="{{ track.image }}" alt="{{track.name}}">
-                </div>
-                <div id="trackInfo" class="col-md my-auto">
-                    <a href="{% url track.url track.id %}{% if track.albumimage %}?album_image={{ track.albumimage }}&album_name={{ track.albumname }}{% endif %}">
-                    {{ track.name }} by {{ track.artist }}</a>
-                </div>
-            </div>
-            {% endfor %}
-        </div>
-    </div>
+      </div> 
+      <div class="col-md-6 pt-4 pl-3"> 
+          <div id="results">
+              {% for track in tracks %}
+              <div class="row pb-3">
+                  <div class="col-md-3">
+                      <img id="trackImg" src="{{ track.image }}" alt="{{track.name}}">
+                  </div>
+                  <div id="trackInfo" class="col-md my-auto">
+                      <a href="{% url track.url track.id %}{% if track.albumimage %}?album_image={{ track.albumimage }}&album_name={{ track.albumname }}{% endif %}">
+                      {{ track.name }} by {{ track.artist }} ({{track.type}})</a>
+                  </div>
+              </div>
+              {% endfor %}
+          </div>
+      </div>
+  </div>
 </div>
 
 <script>
-    function submitFormData(event) {
-      event.preventDefault(); // prevent default form submission behavior
-      var formData = $('#my-form').serialize(); // serialize form data
-      $.ajax({
-        type: 'GET',
-        url: '/getNewReleases/',
-        data: formData,
-        success: function(response) {
-            var tracks = response.tracks;
-            var results = '';
-          // handle successful response
-            for (var i = 0; i < tracks.length; i++) {
-                var track = tracks[i];
-                // Generate HTML for the track name, artist name, and cover image
-                var trackHtml = '<div class="row track pb-3">';
-                trackHtml += '<div class=col-lg-3>'
-                trackHtml += '<img id="trackImg" src="' + track.image + '" alt="' + track.name + '">';
-                trackHtml += '</div>'
-                trackHtml += '<div class="col-md track-details my-auto">';
-                trackHtml += '<a href="' + track.url + '">' + track.name + ' by ' + track.artist + '</a>';
+document.getElementById("country-select").addEventListener("change", function() {
+    handleCountrySelect(this.value);
+});
 
-                trackHtml += '</div>';
-                trackHtml += '</div>';
-                results += trackHtml;
-            }
-            $('#results').html(results);
-        },
-        error: function(response) {
-          // handle error response
-        }
-      });
-    }
+
+function handleCountrySelect(selectedValue) {
+     // prevent default form submission behavior
+     // serialize form data
+    $.ajax({
+      type: 'GET',
+      url: '/getNewReleases/',
+      data: {'countryName': $('#country-select option:selected').text(),
+            'countryCode': selectedValue},
+      dataType: 'json',
+      beforeSend: function() {
+        // Show loading message
+        $('#results').html('<p>Loading...</p>');
+      },
+      success: function(response) {
+          var tracks = response.tracks;
+          var results = '';
+          var countryName = $('#country-select option:selected').text();
+          $('#newIn').text('New Songs in ' + countryName);
+        // handle successful response
+          for (var i = 0; i < tracks.length; i++) {
+              var track = tracks[i];
+              // Generate HTML for the track name, artist name, and cover image
+              var trackHtml = '<div class="row track pb-3">';
+              trackHtml += '<div class=col-lg-3>'
+              trackHtml += '<img id="trackImg" src="' + track.image + '" alt="' + track.name +'">';
+              trackHtml += '</div>'
+              trackHtml += '<div class="col-md track-details my-auto">';
+              trackHtml += '<a href="' + track.url + '">' + track.name + ' by ' + track.artist + " ("+ track.type +")"+'</a>';
+
+              trackHtml += '</div>';
+              trackHtml += '</div>';
+              results += trackHtml;
+          }
+          $('#results').html(results);
+      },
+      error: function(response) {
+        $('#results').html('Error getting data');
+      }
+    });
+  }
   </script>
 {% endblock %} 

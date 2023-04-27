@@ -151,4 +151,4 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # Spotify app credentials
 SPOTIPY_CLIENT_ID = 'a2be13064936401992b518216aade28c'
 SPOTIPY_CLIENT_SECRET = 'ef320547195a4b80b5fe92c931486723'
-SPOTIPY_REDIRECT_URI = 'http://localhost:8000/accounts/spotifyStats/'
+SPOTIPY_REDIRECT_URI = 'http://localhost:8000/accounts/spotifyStats/callback/'

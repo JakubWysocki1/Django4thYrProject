@@ -8,7 +8,11 @@
         <i class="fas fa-angle-right fa-xs"></i>
         {{album_name}}
     </small>
+
     <div class="col-md-6 pt-4"> 
+        {% if invalid_id %}
+        {{invalid_id}}
+        {% endif %}
         <h1>{{album_name}}</h1>
         <div id="results">
             {% for track in tracks %}

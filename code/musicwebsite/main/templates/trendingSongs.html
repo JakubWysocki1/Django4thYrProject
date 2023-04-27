@@ -9,14 +9,15 @@
         Trending Songs
     
       </small>
-    <div class="row justify-content-md-center mt-3">
-        <div class="col-md-6">
-            <small id="playlistLink" class="my-auto"><a href="https://open.spotify.com/playlist/37i9dQZEVXbMDoHDwVN2tF?si=aa665591baa647ca">Open in Spotify</a></small>
+    <div class="row mt-3">
+
+        <div class="col-md ml-4">
+            
             <div class="row">
-                
-                <h1 id="trendingIn" class="pb-2">Trending Songs in The World</h1>   
+                <h1 id="trendingIn" class="pb-2">Trending Songs in The World</h1>
+                <a id="" class="my-auto ml-3 pb-2" href="https://open.spotify.com/playlist/37i9dQZEVXbMDoHDwVN2tF?si=aa665591baa647ca">Open in Spotify</a>
             </div>
-            <div class="row">
+            <div class="row ml-2">
                 Select a Country
                 <select class="ml-2" id="country-select">
                     <option selected value="global">The World</option>
@@ -41,40 +42,7 @@
                 </div>
             </div>
             
-        </div>
-        <div class="col-md-6">
-            <div class="row">
-                    <h1 id="trendingIn" class="pb-2">Trending Songs in The World</h1>
-                    <small id="playlistLink" class="my-auto">Open in Spotify</small>
-            </div>
-            <div class="row">
-                Select a Genra
-                <select id="genra-select" class="ml-2">
-                    <option selected></option>
-                    {% for genre in genras %}
-                    <option value="{{ genre }}">{{ genre }}</option>
-                    {% endfor %}
-                </select>  
-    
-            </div>
-            <div class="col-md-6 pt-4"> 
-                <div id="results">
-                    {% for track in topsongs %}
-                    <div class="row pb-3">
-                        <div class="col-md-3">
-                            <img id="trackImg" src="{{ track.track.album.images.2.url }}" alt="{{track.track.name}}">
-                        </div>
-                        <div id="trackInfo" class="col-md my-auto">
-                            <a href="{% url 'main:songdetail' song_id=track.track.id %}">
-                            {{ track.track.name }} by {{ track.track.artists.0.name }}</a>
-                        </div>
-                    </div>
-                {% endfor %}
-                </div>
-            </div>
-            
-        </div>
-            
+        </div>      
         
     </div>
 </div>
@@ -98,6 +66,10 @@ function handleCountrySelect(selectedValue) {
             'countryCode': selectedValue
         },
         dataType: 'json',
+        beforeSend: function() {
+        // Show loading message
+             $('#results').html('<p>Loading...</p>');
+        },
         success: function(response) {
             // Handle successful response
             var tracks = response.tracks;
@@ -142,7 +114,7 @@ function handleCountrySelect(selectedValue) {
         },
         error: function(xhr, status, error) {
             // Handle error
-            console.log(error);
+            $('#results').html('Error getting data');
         }
     });
 }

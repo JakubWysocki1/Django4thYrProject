@@ -10,134 +10,144 @@
       {% endfor %}
   </div>
   {% endif %}
-    <div class="row">
-      <div class="col-md-8">
-        <h2 id="forum-category" class="pt-2 pb-2">{{category_name}}</h2>
-      </div>
-      <div class="my-auto">
-        {% if user.is_authenticated %}
-          <button id="postopic" type="button" class="btn btn-link btn-sm" data-toggle="modal" data-target="#postTopic">
-              Post a Topic
-          </button>
-          <div class="modal fade" id="postTopic" tabindex="-1" role="dialog" aria-labelledby="postTopicLabel" aria-hidden="true">
-            <div class="modal-dialog modal-dialog-centered" role="document">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="postTopicLabel">Post Topic</h5>
-                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                            <span aria-hidden="true">&times;</span>
-                        </button>
-                    </div>
-                    <div class="modal-body">
-                        <form id="postTopic-form" method="POST">
-                            {% csrf_token %}
-                            {{ forumPostForm| crispy }}
-                            <input type="hidden" name="postTopic">
-                        </form>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                        <button type="submit" class="btn btn-primary" form="postTopic-form">Post</button>
-                    </div>
-                </div>
-            </div>
-          </div>
-        {% else %}
-        <small>Login to post a topic</small>
-        {% endif %}
-      </div>
-    </div>
-    <div class="row">
-      <div class="col">
-        <div class="d-flex justify-content-md-center">
-        <table id="post-table" class="table table-hover table-xs-responsive">
-            <thead>
-              <tr>
-                <th scope="col"></th>
-                <th scope="col" class="w-100">Topic</th>
-                <th scope="col" class="w-25">Author</th>
-                <th scope="col" class="w-25">Posted</th>
-              </tr>
-            </thead>
-            
-            <tbody>
-            {% for post in posts %}
-              <tr style="cursor:pointer;">
-                {% if post.user == request.user %}
-                  <td>
-                    <div class="col">
-                      <button id="editTopic" type="button" class="btn btn-link btn-sm" data-toggle="modal" data-target="#editTopic{{post.id}}"onclick="populateEditForm('{{post.id}}', '{{post.body|linebreaksbr}}', '{{post.title|linebreaksbr}}')"><small>
-                        Edit
-                      </small>
-                      </button>
-                    </div>
-                    <div class="col">
-                      <button id="deleteTopic" type="button" class="btn btn-link btn-sm" data-toggle="modal" data-target="#deleteTopic-{{post.id}}"><small style="color: rgb(255, 96, 96);">
-                        Delete
-                      </small>
-                      </button>
-                    </div>
-                  </td>
-                  <div class="modal fade" id="deleteTopic-{{post.id}}" tabindex="-1" role="dialog" aria-labelledby="deleteTopicLabel-{{post.id}}" aria-hidden="true">
-                    <div class="modal-dialog modal-dialog-centered" role="document">
-                        <div class="modal-content">
-                            <div class="modal-header">
-                                <h5 class="modal-title" id="deleteTopicLabel-{{post.id}}">Delete Topic</h5>
-                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                    <span aria-hidden="true">&times;</span>
-                                </button>
-                            </div>
-                            <div class="modal-body">
-                              <p>{{post.title}}</p>
-                            </div>
-                            <div class="modal-footer">
-                                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                                <form method="POST" id="delete-post-form-{{post.id}}">
-                                  {% csrf_token %}
-                                  <input type="hidden" name="deleteTopic" value="{{post.id}}">
-                                  <button type="submit" class="btn btn-danger" form="delete-post-form-{{post.id}}">Delete</button>
-                                </form>
-                            </div>
-                        </div>
-                    </div>
+    {% if invalid_id %}
+    <p class="pt-2">{{invalid_id}}</p>
+    {% else %}
+      <small>
+        <a href="{% url 'forum:forumtopics' %}">Forum
+        </a>
+        <i class="fas fa-angle-right fa-xs"></i>
+        {{category_name}}
+      </small>
+      <div class="row">
+        <div class="col-md-8">
+          <h2 id="forum-category" class="pt-2 pb-2">{{category_name}}</h2>
+        </div>
+        <div class="my-auto">
+          {% if user.is_authenticated %}
+            <button id="postopic" type="button" class="btn btn-link btn-sm" data-toggle="modal" data-target="#postTopic">
+                Post a Topic
+            </button>
+            <div class="modal fade" id="postTopic" tabindex="-1" role="dialog" aria-labelledby="postTopicLabel" aria-hidden="true">
+              <div class="modal-dialog modal-dialog-centered" role="document">
+                  <div class="modal-content">
+                      <div class="modal-header">
+                          <h5 class="modal-title" id="postTopicLabel">Post Topic</h5>
+                          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                              <span aria-hidden="true">&times;</span>
+                          </button>
+                      </div>
+                      <div class="modal-body">
+                          <form id="postTopic-form" method="POST">
+                              {% csrf_token %}
+                              {{ forumPostForm| crispy }}
+                              <input type="hidden" name="postTopic">
+                          </form>
+                      </div>
+                      <div class="modal-footer">
+                          <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                          <button type="submit" class="btn btn-primary" form="postTopic-form">Post</button>
+                      </div>
                   </div>
-                  <div class="modal fade" id="editTopic{{post.id}}" tabindex="-1" role="dialog" aria-labelledby="editTopicLabel" aria-hidden="true">
-                    <div class="modal-dialog modal-dialog-centered" role="document">
-                        <div class="modal-content">
-                            <div class="modal-header">
-                                <h5 class="modal-title" id="editTopicLabel">Edit Topic</h5>
-                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                    <span aria-hidden="true">&times;</span>
-                                </button>
-                            </div>
-                            <div class="modal-body">
-                                <form id="edit-form-{{post.id}}" method="POST" action="{% url 'forum:categoryposts' post.category %}">
-                                    {% csrf_token %}
-                                    <p>{{ editpost| crispy }}</p>
-                                    <input type="hidden" name="editTopic" value="{{post.id}}">
-                                </form>
-                            </div>
-                            <div class="modal-footer">
-                                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                                <button type="submit" class="btn btn-primary" form="editTopicForm{{post.id}}" onclick="event.preventDefault(); document.getElementById('edit-form-{{post.id}}').submit();">Save</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                {% else %}
-                <td>
-                {% endif %}
-                <td><a class="my-auto" href="{% url 'forum:post' post.id %}">{{post.title}}</a></td>
-                <td><a class="my-auto" href="{% url 'accounts:profile' post.user %}">{{post.user}}</a></td>
-                <td id="timeposted">{{post.time_since_created}} ago</td>
-              </tr>
-            
-            {% endfor %}
-            </tbody>
-          </table>
+              </div>
+            </div>
+          {% else %}
+          <small>Login to post a topic</small>
+          {% endif %}
         </div>
       </div>
-    </div> 
+      <div class="row">
+        <div class="col">
+          <div class="d-flex justify-content-md-center">
+          <table id="post-table" class="table table-hover table-xs-responsive">
+              <thead>
+                <tr>
+                  <th scope="col"></th>
+                  <th scope="col" class="w-100">Topic</th>
+                  <th scope="col" class="w-25">Author</th>
+                  <th scope="col" class="w-25">Posted</th>
+                </tr>
+              </thead>
+              
+              <tbody>
+              {% for post in posts %}
+                <tr style="cursor:pointer;">
+                  {% if post.user == request.user %}
+                    <td>
+                      <div class="col">
+                        <button id="editTopic" type="button" class="btn btn-link btn-sm" data-toggle="modal" data-target="#editTopic{{post.id}}"onclick="populateEditForm('{{post.id}}', '{{post.body|linebreaksbr}}', '{{post.title|linebreaksbr}}')"><small>
+                          Edit
+                        </small>
+                        </button>
+                      </div>
+                      <div class="col">
+                        <button id="deleteTopic" type="button" class="btn btn-link btn-sm" data-toggle="modal" data-target="#deleteTopic-{{post.id}}"><small style="color: rgb(255, 96, 96);">
+                          Delete
+                        </small>
+                        </button>
+                      </div>
+                    </td>
+                    <div class="modal fade" id="deleteTopic-{{post.id}}" tabindex="-1" role="dialog" aria-labelledby="deleteTopicLabel-{{post.id}}" aria-hidden="true">
+                      <div class="modal-dialog modal-dialog-centered" role="document">
+                          <div class="modal-content">
+                              <div class="modal-header">
+                                  <h5 class="modal-title" id="deleteTopicLabel-{{post.id}}">Delete Topic</h5>
+                                  <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                      <span aria-hidden="true">&times;</span>
+                                  </button>
+                              </div>
+                              <div class="modal-body">
+                                <p>{{post.title}}</p>
+                              </div>
+                              <div class="modal-footer">
+                                  <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                                  <form method="POST" id="delete-post-form-{{post.id}}">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="deleteTopic" value="{{post.id}}">
+                                    <button type="submit" class="btn btn-danger" form="delete-post-form-{{post.id}}">Delete</button>
+                                  </form>
+                              </div>
+                          </div>
+                      </div>
+                    </div>
+                    <div class="modal fade" id="editTopic{{post.id}}" tabindex="-1" role="dialog" aria-labelledby="editTopicLabel" aria-hidden="true">
+                      <div class="modal-dialog modal-dialog-centered" role="document">
+                          <div class="modal-content">
+                              <div class="modal-header">
+                                  <h5 class="modal-title" id="editTopicLabel">Edit Topic</h5>
+                                  <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                      <span aria-hidden="true">&times;</span>
+                                  </button>
+                              </div>
+                              <div class="modal-body">
+                                  <form id="edit-form-{{post.id}}" method="POST" action="{% url 'forum:categoryposts' post.category %}">
+                                      {% csrf_token %}
+                                      <p>{{ editpost| crispy }}</p>
+                                      <input type="hidden" name="editTopic" value="{{post.id}}">
+                                  </form>
+                              </div>
+                              <div class="modal-footer">
+                                  <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                                  <button type="submit" class="btn btn-primary" form="editTopicForm{{post.id}}" onclick="event.preventDefault(); document.getElementById('edit-form-{{post.id}}').submit();">Save</button>
+                              </div>
+                          </div>
+                      </div>
+                  </div>
+                  {% else %}
+                  <td>
+                  {% endif %}
+                  <td><a class="my-auto" href="{% url 'forum:post' category_name post.id %}">{{post.title}}</a></td>
+                  <td><a class="my-auto" href="{% url 'accounts:profile' post.user %}">{{post.user}}</a></td>
+                  <td id="timeposted">{{post.time_since_created}} ago</td>
+                </tr>
+              
+              {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div> 
+      {% endif %}
 </div>
 <script>
 const alertMessage = document.querySelector('#alert');

@@ -9,3 +9,5 @@ class ForumPostForm(forms.ModelForm):
         widgets = {
             'title': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Write your title...'})
         }
+
+

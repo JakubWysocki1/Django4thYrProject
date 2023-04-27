@@ -8,6 +8,7 @@ app_name='forum'
 urlpatterns = [
     path('', views.forumtopics, name='forumtopics'),
     path('<str:category_name>/', views.categoryposts, name='categoryposts'),
-    path('post/<str:post_id>/', views.post, name='post'),
+    path('<str:category_name>/post/<str:post_id>/', views.post, name='post'),
+
    
 ] 

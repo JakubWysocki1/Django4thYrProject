@@ -2,7 +2,7 @@ import spotipy
 from django.shortcuts import render, redirect, get_object_or_404
 import requests
 from spotipy.oauth2 import SpotifyOAuth, SpotifyClientCredentials
-from spotipy import Spotify
+from spotipy import SpotifyException
 from django.shortcuts import get_object_or_404
 from .forms import CommentForm, ReplyForm, EditReplyForm
 from .models import Comment, Review, CommentReply
@@ -60,104 +60,125 @@ def song_detail(request, song_id):
 
     referer_url = request.META.get('HTTP_REFERER')
 
-    if "trendingSongs" in referer_url:
-        referer_name = "Trending Songs"
-    elif "newReleases" in referer_url:
-        referer_name = "New Releases"
-    elif "albumDetail" in referer_url:
-        referer_name = "Album"
-    elif "ratingstats" in referer_url:
-        referer_name = "Rating Statistics"
-
-    else:
-        referer_name = "?"
+    referer_name = ""
+    if referer_url is not None:
+        if "trendingSongs" in referer_url:
+            referer_name = "Trending Songs"
+        elif "newReleases" in referer_url:
+            referer_name = "New Releases"
+        elif "albumDetail" in referer_url:
+            referer_name = "Album"
+        elif "ratingstats" in referer_url:
+            referer_name = "Rating Statistics"
+        else:
+            referer_name = ""
 
     uri = 'spotify:track:' + song_id
-    songinfo = sp.track(uri)
-
-    comments = Comment.objects.filter(song_id=song_id).order_by('-created_at')
-    comment_count = comments.count()
-
-    ratings = Review.objects.filter(song_id=song_id)
-    if ratings.exists():
-        average_rating = round(ratings.aggregate(Avg('rating'))['rating__avg'], 1)
-    else:
-        average_rating = "-"
-    rating_count = ratings.count()
-
-    form = CommentForm()
-    editform = CommentForm()
-    replyform = ReplyForm()
-    editreplyform = EditReplyForm()
    
 
-    if request.method == 'POST':
-        if 'addComment' in request.POST:
-            form = CommentForm(request.POST)
-            if form.is_valid():
-                comment = form.save(commit=False)
-                comment.user = request.user
-                comment.song_id = song_id
-                comment.save()
-                messages.success(request, 'Comment Added!')
-                return redirect('main:songdetail', song_id=song_id)
-        elif 'deleteComment' in request.POST:
-            comment_id = request.POST.get('deleteComment')
-            comment = get_object_or_404(Comment, id=comment_id, user=request.user)
-            comment.delete()
-            messages.warning(request, 'Comment Deleted!')
-            return redirect('main:songdetail', song_id=song_id)
-        
-        elif 'editComment' in request.POST:
-            comment_id = request.POST.get('editComment')
-            comment = get_object_or_404(Comment, id=comment_id, user=request.user)
-            editform = CommentForm(request.POST, instance=comment)
-            if editform.is_valid():
-                editform.save()
-                messages.success(request, 'Comment Updated!')
-                return redirect('main:songdetail', song_id=song_id)
-            
-        elif 'parent_comment_id' in request.POST:
-            print('parent_comment_id')
-            replyform = ReplyForm(request.POST)
-            if replyform.is_valid():
-                reply = replyform.save(commit=False)
-                reply.user = request.user
-                reply.comment_id = replyform.cleaned_data['parent_comment_id']
-                reply.save()
-                messages.success(request, 'Reply Posted!')
-                return redirect('main:songdetail', song_id=song_id)
-            
-        elif 'deleteReply' in request.POST:
-            reply_id = request.POST.get('deleteReply')
-            print('deletereply')
-            reply = get_object_or_404(CommentReply, id=reply_id, user=request.user)
-            reply.delete()
-            messages.warning(request, 'Reply Deleted!')
-            return redirect('main:songdetail', song_id=song_id)
 
-        elif 'editReply' in request.POST:
-            reply_id = request.POST.get('editReply')
-            reply = get_object_or_404(CommentReply, id=reply_id, user=request.user)
-            editreplyform = EditReplyForm(request.POST, instance=reply)
-            if editreplyform.is_valid():
-                editreplyform.save()
-                messages.success(request, 'Reply Updated!')
+    try:
+        songinfo = sp.track(uri)
+        comments = Comment.objects.filter(song_id=song_id).order_by('-created_at')
+        comment_count = comments.count()
+
+        ratings = Review.objects.filter(song_id=song_id)
+        if ratings.exists():
+            average_rating = round(ratings.aggregate(Avg('rating'))['rating__avg'], 1)
+        else:
+            average_rating = "-"
+        rating_count = ratings.count()
+
+        form = CommentForm()
+        editform = CommentForm()
+        replyform = ReplyForm()
+        editreplyform = EditReplyForm()
+        user_review = Review.objects.filter(user=request.user, song_id=song_id).first()
+
+        if request.method == 'POST':
+            if 'addComment' in request.POST:
+                form = CommentForm(request.POST)
+                if form.is_valid():
+                    comment = form.save(commit=False)
+                    comment.user = request.user
+                    comment.song_id = song_id
+                    comment.save()
+                    messages.success(request, 'Comment Added!')
+                    return redirect('main:songdetail', song_id=song_id)
+            elif 'deleteComment' in request.POST:
+                comment_id = request.POST.get('deleteComment')
+                comment = get_object_or_404(Comment, id=comment_id, user=request.user)
+                comment.delete()
+                messages.warning(request, 'Comment Deleted!')
+                return redirect('main:songdetail', song_id=song_id)
+            
+            elif 'editComment' in request.POST:
+                comment_id = request.POST.get('editComment')
+                comment = get_object_or_404(Comment, id=comment_id, user=request.user)
+                editform = CommentForm(request.POST, instance=comment)
+                if editform.is_valid():
+                    editform.save()
+                    messages.success(request, 'Comment Updated!')
+                    return redirect('main:songdetail', song_id=song_id)
+                
+            elif 'parent_comment_id' in request.POST:
+                print('parent_comment_id')
+                replyform = ReplyForm(request.POST)
+                if replyform.is_valid():
+                    reply = replyform.save(commit=False)
+                    reply.user = request.user
+                    reply.comment_id = replyform.cleaned_data['parent_comment_id']
+                    reply.save()
+                    messages.success(request, 'Reply Posted!')
+                    return redirect('main:songdetail', song_id=song_id)
+                
+            elif 'deleteReply' in request.POST:
+                reply_id = request.POST.get('deleteReply')
+                print('deletereply')
+                reply = get_object_or_404(CommentReply, id=reply_id, user=request.user)
+                reply.delete()
+                messages.warning(request, 'Reply Deleted!')
                 return redirect('main:songdetail', song_id=song_id)
 
-        elif 'addRating' in request.POST:
-            ratingVal = request.POST.get('addRating')
-            if ratingVal:
-                rating = Review.objects.create(
-                user=request.user,
-                song_id=song_id,
-                rating=ratingVal,)
-            messages.success(request, 'Rating Added!')
-            return redirect('main:songdetail', song_id=song_id)
-            
-    return render(request, 'songdetail.html', {'songinfo': songinfo, 'form': form, 'comments': comments, 
-                                               'comment_count': comment_count, 'editform': editform, 'replyform': replyform, 
-                                               'editreplyform': editreplyform, 'average_rating': average_rating, 'rating_count':rating_count,'refererurl': referer_url, 'referername': referer_name})
+            elif 'editReply' in request.POST:
+                reply_id = request.POST.get('editReply')
+                reply = get_object_or_404(CommentReply, id=reply_id, user=request.user)
+                editreplyform = EditReplyForm(request.POST, instance=reply)
+                if editreplyform.is_valid():
+                    editreplyform.save()
+                    messages.success(request, 'Reply Updated!')
+                    return redirect('main:songdetail', song_id=song_id)
+
+            elif 'addRating' in request.POST:
+                
+                if user_review:
+                    ratingVal = request.POST.get('addRating')
+                    if ratingVal:
+                        user_review.rating = ratingVal
+                        user_review.save()
+                        messages.success(request, 'Rating Updated!')
+                else:
+                    ratingVal = request.POST.get('addRating')
+                    if ratingVal:
+                        rating = Review.objects.create(
+                            user=request.user,
+                            song_id=song_id,
+                            rating=ratingVal,
+                        )
+                        messages.success(request, 'Rating Added!')
+                return redirect('main:songdetail', song_id=song_id)
+                
+        return render(request, 'songdetail.html', {'songinfo': songinfo, 'form': form, 'comments': comments, 
+                                                'comment_count': comment_count, 'editform': editform, 'replyform': replyform, 
+                                                'editreplyform': editreplyform, 'average_rating': average_rating,
+                                                    'rating_count':rating_count,'refererurl': referer_url, 'referername': referer_name, 'user_review': user_review})
+    
+    except SpotifyException as e:
+        invalid_id = "Invalid Song id... Nothing to display "
+        return render(request, 'songdetail.html', {"invalid_id": invalid_id,'songinfo': "", 'form': "", 'comments': "", 
+                                                'comment_count': "", 'editform': "", 'replyform': "", 
+                                                'editreplyform': "", 'average_rating': "",
+                                                    'rating_count':"",'refererurl': "", 'referername': "", 'user_review': ""})
 
 def trendingSongs(request):
     sp = authentication()
@@ -214,7 +235,7 @@ def newReleases(request):
 
     sp = authentication()
 
-    genras = ['test']
+  
     country_codes = sp.available_markets()['markets']
     
     countries = CountryConverter().convert(names=country_codes, to='name_short')
@@ -233,11 +254,13 @@ def newReleases(request):
     new_releases = new_releasesresults
     trackslist =[]
     for album in new_releases['albums']['items']:
+        
         if album['album_group'] == "single":
-            
+            type = "Single"
             tracks = sp.album_tracks(album['id'])
             id = tracks['items'][0]['id']
             track = {
+                'type': "Single",
                 'name': album['name'],
                 'artist': album['artists'][0]['name'],
                 'url': 'main:songdetail',
@@ -245,9 +268,10 @@ def newReleases(request):
                 'image': album['images'][2]['url'] if album['images'] else None
             }
             trackslist.append(track)
-        else:
-           
+        elif album['album_group'] == "album":
+            
             track = {
+                'type': "Album",
                 'name': album['name'],
                 'artist': album['artists'][0]['name'],
                 'url': 'main:album_detail',
@@ -257,43 +281,49 @@ def newReleases(request):
                 'image': album['images'][2]['url'] if album['images'] else None
             }
             trackslist.append(track)
+        else:
+            type == "unknown"
 
     
     
-    return render(request, 'newReleases.html', {'genres': genras, 'countries':finalcountries, 'tracks': trackslist})
+    return render(request, 'newReleases.html', {'type':type,'countries':finalcountries, 'tracks': trackslist})
 
 def albumDetail(request, album_id):
     sp = authentication()
-    tracks = sp.album_tracks(album_id)
-    album_image = request.GET.get('album_image')
-    album_name = request.GET.get('album_name')
-    trackslist =[]
-    for track in tracks['items']:
-        
-        artist = track['artists'][0]['name']
-        if len(track['artists']) > 1:
-            artists= []
-            for artist in track['artists']:
-                artists.append(artist['name'])
-            artist = ', '.join(artists)        
-        track = {
-            'name': track['name'],
-            'artist': artist,
-            'id': track['id'],
-            'image': album_image
-        }
-        trackslist.append(track)
-    return render(request, 'albumdetail.html', {'tracks': trackslist, 'album_name':album_name,})
+
+    try:
+        tracks = sp.album_tracks(album_id)
+        album_image = request.GET.get('album_image')
+        album_name = request.GET.get('album_name')
+        trackslist =[]
+        for track in tracks['items']:
+            
+            artist = track['artists'][0]['name']
+            if len(track['artists']) > 1:
+                artists= []
+                for artist in track['artists']:
+                    artists.append(artist['name'])
+                artist = ', '.join(artists)        
+            track = {
+                'name': track['name'],
+                'artist': artist,
+                'id': track['id'],
+                'image': album_image
+            }
+            trackslist.append(track)
+        return render(request, 'albumdetail.html', {'tracks': trackslist, 'album_name':album_name,})
+    except SpotifyException as e:
+        invalid_id = "Invalid album id... Nothing to display "
+        return render(request, 'albumdetail.html', {'invalid_id': invalid_id,'tracks': "", 'album_name':"",})
+
 
 
 def getNewReleases(request):
     sp = authentication()
 
 
-    country = request.GET.get('country')
-    genre = request.GET.get('genre')
-    type = request.GET.get('type')
-    print(country)
+    country = request.GET.get('countryCode')
+   
     
    
     if country == "global":
@@ -307,6 +337,7 @@ def getNewReleases(request):
             tracks = sp.album_tracks(album['id'])
             id = tracks['items'][0]['id']
             track = {
+                'type': "Single",
                 'name': album['name'],
                 'artist': album['artists'][0]['name'],
                 'url': reverse('main:songdetail', args=[id]),
@@ -316,9 +347,10 @@ def getNewReleases(request):
             trackslist.append(track)
         else:
             track = {
+                'type': "Album",
                 'name': album['name'],
                 'artist': album['artists'][0]['name'],
-                'url': reverse('main:album_detail', args=[album['id']]),
+                'url': reverse('main:album_detail', args=[album['id']])+'?album_image='+album['images'][2]['url']+'&album_name='+album['name'] if album['images'] else None,
                 'id': album['id'],
                 'albumimage': album['images'][2]['url'] if album['images'] else None,
                 'albumname': album['name'],
@@ -407,41 +439,45 @@ def getTrendinSongs(request):
 def ratingStats(request, song_id):
     sp = authentication()
 
-    songinfo = sp.track(song_id)
+    try:
+        songinfo = sp.track(song_id)
 
 
-    ratings = Review.objects.filter(song_id=song_id)
-    ratings_dict = {i: 0 for i in range(1, 11)}  # initialize counts to 0 for all possible ratings (1-10)
+        ratings = Review.objects.filter(song_id=song_id)
+        ratings_dict = {i: 0 for i in range(1, 11)}  # initialize counts to 0 for all possible ratings (1-10)
 
-    # Count the ratings
-    ratings_list = []
-    for review in ratings:
-        rating = review.rating
-        ratings_list.append(rating)
-        ratings_dict[rating] += 1
+        # Count the ratings
+        ratings_list = []
+        for review in ratings:
+            rating = review.rating
+            ratings_list.append(rating)
+            ratings_dict[rating] += 1
 
-    print(len(ratings_list))
+        print(len(ratings_list))
 
-    if len(ratings_list) == 0:
-        mean_rating = 0
-        mode_rating = 0
-        median_rating = 0
-    else:
-        mean_rating = round(statistics.mean(ratings_list), 1)
-        mode_rating = round(statistics.mode(ratings_list), 1)
-        median_rating = round(statistics.median(ratings_list), 1)
+        if len(ratings_list) == 0:
+            mean_rating = 0
+            mode_rating = 0
+            median_rating = 0
+        else:
+            mean_rating = round(statistics.mean(ratings_list), 1)
+            mode_rating = round(statistics.mode(ratings_list), 1)
+            median_rating = round(statistics.median(ratings_list), 1)
 
 
-    
+        
 
-    # Convert the ratings count to a list of dictionaries
-    ratings_list = [{'rating': rating, 'votes': count} for rating, count in ratings_dict.items()]
+        # Convert the ratings count to a list of dictionaries
+        ratings_list = [{'rating': rating, 'votes': count} for rating, count in ratings_dict.items()]
 
-    # Sort the ratings list by descending order of votes
-    ratings_list.sort(key=lambda x: x['rating'], reverse=True)
-    ratings_json = json.dumps(ratings_list)
+        # Sort the ratings list by descending order of votes
+        ratings_list.sort(key=lambda x: x['rating'], reverse=True)
+        ratings_json = json.dumps(ratings_list)
 
-    return render(request, "ratingStats.html", {'ratings': ratings_json, 'songinfo': songinfo, 'meanrating': mean_rating, 'medianrating': median_rating, 'moderating':mode_rating})
+        return render(request, "ratingStats.html", {'ratings': ratings_json, 'songinfo': songinfo, 'meanrating': mean_rating, 'medianrating': median_rating, 'moderating':mode_rating})
+    except SpotifyException as e:
+        invalid_id = "Invalid song id... Nothing to display "
+        return render(request, "ratingStats.html", {'invalid_id': invalid_id,'ratings': "", 'songinfo': "", 'meanrating': "", 'medianrating': "", 'moderating':""})
 
 
 

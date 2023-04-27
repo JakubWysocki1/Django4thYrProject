@@ -104,20 +104,17 @@ def profileDetailsView(request, profile_name):
 
 
 sp_oauth = spotipy.oauth2.SpotifyOAuth(
-            client_id='a2be13064936401992b518216aade28c',
-            client_secret='ef320547195a4b80b5fe92c931486723',
-            redirect_uri='http://localhost:8000/accounts/spotifyStats/callback/',
+            client_id=settings.SPOTIPY_CLIENT_ID,
+            client_secret=settings.SPOTIPY_CLIENT_SECRET,
+            redirect_uri=settings.SPOTIPY_REDIRECT_URI,
             scope=['user-read-email','user-read-private','user-top-read'],
-            show_dialog=True,
-            cache_path=None)
+            show_dialog=True,)
 
 def spotify_authorize(request):
-    if request.user.is_authenticated:
         # Create a new SpotifyOAuth object
-        auth_url = sp_oauth.get_authorize_url()
-        return redirect(auth_url)
-    else:
-        return redirect('accounts:signin')
+    auth_url = sp_oauth.get_authorize_url()
+    return redirect(auth_url)
+
 
 def spotify_callback(request):
    

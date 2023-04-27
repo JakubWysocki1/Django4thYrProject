@@ -3,17 +3,63 @@
 {% load crispy_forms_tags %}
 {% block content %}
 <div id="postContainer" class="container">
-    <div class="row">
-        <div class="col-md">
-            <h1 id="posttitle">{{post.title}}</h1>
-            <img id="imageprofile" src="{{ post.user.userprofile.profile_picture.url }}">
-            <p><a href="{% url 'accounts:profile' post.user %}">{{post.user}}</a></p>
-            <p>{{post.body |linebreaksbr}}</p>
-        </div>
+    {% if messages %}
+    <div id="alert" class="alert alert-success">
+        {% for message in messages %}
+        <strong{% if message.tags %} class="{{ message.tags }}">{% endif %}{{ message }}</strong>
+        {% endfor %}
     </div>
+    {% endif %}
+    <div class="row">
+        {% if invalid_id %}
+            <p class="pt-2 pl-2">{{invalid_id}}</p>
+        {% else %}
+    
+        <small class="ml-3 mt-1">
+            <a href="{% url 'forum:categoryposts' category_name %}"> {{category_name}}
+            </a>
+            <i class="fas fa-angle-right fa-xs"></i>
+            Post {{post.id}}
+          </small>
 
- 
-   
+     </div>
+        <div class="col-md mt-4">
+            <div class="card"> 
+                <div class="card-body ">
+                    <div class="row">
+                        <div class="col-10 border-right">
+                            <h1 class="card-title ml-3" id="posttitle">{{post.title}}</h1>
+                        </div>
+                        
+                        <div class="col-2">
+                            <div class="row ml-1">
+                            <img id="postimageprofile" src="{{ post.user.userprofile.profile_picture.url }}">                      
+                            <p class="my-auto ml-2"><a href="{% url 'accounts:profile' post.user %}">{{post.user}}</a></p>
+                            </div>
+                        </div>
+                    </div>
+                    <hr>
+                    <p class="ml-4">{{post.body |linebreaksbr}}</p>
+                </div>
+            </div>
+        </div>
+        {% endif %}   
 </div>
+<script>
+    const alertMessage = document.querySelector('#alert');
+    
+    // Hide the alert message after 3 seconds
+    setTimeout(() => {
+        alertMessage.style.display = 'none';
+    }, 3000);
+    
+    function populateEditForm(commentId, commentText) {
+        var editForm = document.getElementById("edit-form-" + commentId);
+        var commentInput = editForm.querySelector("textarea[name='text']");
+        commentText = commentText.replace(/<br>/g, '');
+        commentInput.value = commentText;
+    }
+    
 
+</script>
 {% endblock %}
