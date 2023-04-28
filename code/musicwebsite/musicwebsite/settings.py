@@ -27,9 +27,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-d!3w^k6abku308s^#jug3t8an5+kn#m5q#sq5*!bv^c68oum$p'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
-
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
@@ -50,7 +50,8 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
-    'django.middleware.security.SecurityMiddleware',
+    "django.middleware.security.SecurityMiddleware",
+    "whitenoise.middleware.WhiteNoiseMiddleware",
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -130,11 +131,11 @@ USE_TZ = True
 STATIC_URL = 'static/'
 
 
-
-
 AUTH_USER_MODEL = 'accounts.CustomUser'
 STATICFILES_DIRS = [str(BASE_DIR.joinpath('static'))]
 STATIC_ROOT = str(BASE_DIR.joinpath('staticfiles'))
+STATICFILES_STORAGE = "whitenoise.storage.CompressedStaticFilesStorage"
+
 STATICFILES_FINDERS = [
     "django.contrib.staticfiles.finders.FileSystemFinder",
     "django.contrib.staticfiles.finders.AppDirectoriesFinder",
@@ -151,4 +152,8 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # Spotify app credentials
 SPOTIPY_CLIENT_ID = 'a2be13064936401992b518216aade28c'
 SPOTIPY_CLIENT_SECRET = 'ef320547195a4b80b5fe92c931486723'
-SPOTIPY_REDIRECT_URI = 'http://localhost:8000/accounts/spotifyStats/callback/'
+
+if DEBUG == True:
+    SPOTIPY_REDIRECT_URI = 'http://localhost:8000/accounts/spotifyStats/callback/'
+else:
+    SPOTIPY_REDIRECT_URI = 'http://spot-a-song.a9gkduchhdgegbfd.eastus.azurecontainer.io:8000/accounts/spotifyStats/callback/'

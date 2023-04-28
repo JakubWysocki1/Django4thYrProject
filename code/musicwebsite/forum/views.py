@@ -12,8 +12,6 @@ from django.http import JsonResponse
 
 def forumtopics(request):
     forumcategory = ForumCategory.objects.all()
-
-
     return render(request, 'forumtopics.html', {'forumcategories':forumcategory})
 
 
@@ -45,7 +43,7 @@ def categoryposts(request, category_name):
                 post_id = request.POST.get('deleteTopic')
                 post = get_object_or_404(ForumPost, id=post_id, user=request.user)
                 post.delete()
-                messages.success(request, 'Comment Deleted!')
+                messages.success(request, 'Topic Deleted!')
                 return redirect('forum:categoryposts', category_name)
             elif "editTopic" in request.POST:
                 post_id = request.POST.get('editTopic')

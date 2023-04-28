@@ -93,7 +93,11 @@ def song_detail(request, song_id):
         editform = CommentForm()
         replyform = ReplyForm()
         editreplyform = EditReplyForm()
-        user_review = Review.objects.filter(user=request.user, song_id=song_id).first()
+
+        if request.user.is_authenticated:
+            user_review = Review.objects.filter(user=request.user, song_id=song_id).first()
+        else:
+            user_review = None
 
         if request.method == 'POST':
             if 'addComment' in request.POST:
