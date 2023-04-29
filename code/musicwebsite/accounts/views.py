@@ -14,6 +14,7 @@ from django.http import HttpResponseForbidden
 from spotipy.oauth2 import SpotifyOAuth
 from django.conf import settings
 import spotipy
+from spotipy import SpotifyException
 
 
 
@@ -117,40 +118,42 @@ def spotify_authorize(request):
 
 
 def spotify_callback(request):
-   
     code = request.GET.get('code')
     token_info = sp_oauth.get_access_token(code)
-    print(token_info['access_token'])
     request.session['access_token'] = token_info['access_token']
     return redirect('accounts:spotifyStats')
 
 
 def spotify_stats(request):
-    access_token = request.session.get('access_token')
-    
-    if not access_token:
-        return redirect('accounts:spotify_authorize')
-    sp = spotipy.Spotify(auth=access_token)
-    userartists = sp.current_user_top_artists(time_range='long_term')
-    usertracks = sp.current_user_top_tracks(time_range='long_term')
+    try:
+        access_token = request.session.get('access_token')
+        
+        if not access_token:
+            return redirect('accounts:spotify_authorize')
+        sp = spotipy.Spotify(auth=access_token)
+        userartists = sp.current_user_top_artists(time_range='long_term')
+        usertracks = sp.current_user_top_tracks(time_range='long_term')
 
-    topartists = userartists['items']
-    artists=[]
-    toptracks = usertracks['items']
-    tracks=[]
-    for artist in topartists:
-        templist = []
-        templist.append(artist['name']) 
-        templist.append(artist['images'][2]['url'])
-        templist.append(artist['external_urls']['spotify'])
-        artists.append(templist)
-    for track in toptracks:
-        templist = []
-        templist.append(track['name']) 
-        templist.append(track['album']['images'][1]['url'])
-        templist.append(track['artists'][0]['name'])
-        templist.append(track['id'])
-        tracks.append(templist)
+        topartists = userartists['items']
+        artists=[]
+        toptracks = usertracks['items']
+        tracks=[]
+        for artist in topartists:
+            templist = []
+            templist.append(artist['name']) 
+            templist.append(artist['images'][2]['url'])
+            templist.append(artist['external_urls']['spotify'])
+            artists.append(templist)
+        for track in toptracks:
+            templist = []
+            templist.append(track['name']) 
+            templist.append(track['album']['images'][1]['url'])
+            templist.append(track['artists'][0]['name'])
+            templist.append(track['id'])
+            tracks.append(templist)
 
-    return render(request, 'spotify_stats.html', {'artists': artists, 'tracks': tracks})
+        return render(request, 'spotify_stats.html', {'artists': artists, 'tracks': tracks})
+    except SpotifyException as e:
+        invalid_id = "User not registered in the Developer Dashboard"
+        return render(request, 'spotify_stats.html', {'invalid_id': invalid_id , 'artists': "", 'tracks': ""})
 
