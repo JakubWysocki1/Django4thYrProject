@@ -204,14 +204,6 @@ def trendingSongs(request):
             countries[i] = "USA"
 
         finalcountries.append([country_codes[i],countries[i]])
-    # for code in country_codes:
-    #     country  = pycountry.countries.get(alpha_2=code)
-    #     if country is not None:
-    #         country = country.name 
-    #         templist = []
-    #         templist.append(country)
-    #         templist.append(code)
-    #         countries.append(templist)   
 
     top_songsGlobalURI = 'spotify:playlist:37i9dQZEVXbMDoHDwVN2tF'
     
@@ -224,13 +216,8 @@ def trendingSongs(request):
         topsongs.extend(top_songsResults['items'])
 
 
-
     results = sp.search(q='top afropop', type='playlist', limit=1)
    
-
-       
-    # categories = sp.categories(country='US', limit=50)['categories']['items']
-    # print({category['name']: category['id'] for category in categories})
 
     return render(request, 'trendingSongs.html', { 'genras': genras, 'countries': finalcountries, 'topsongs': topsongs})
 
@@ -238,7 +225,6 @@ def trendingSongs(request):
 def newReleases(request):
 
     sp = authentication()
-
   
     country_codes = sp.available_markets()['markets']
     
@@ -325,10 +311,7 @@ def albumDetail(request, album_id):
 def getNewReleases(request):
     sp = authentication()
 
-
     country = request.GET.get('countryCode')
-   
-    
    
     if country == "global":
         country = None
@@ -468,8 +451,6 @@ def ratingStats(request, song_id):
             mode_rating = round(statistics.mode(ratings_list), 1)
             median_rating = round(statistics.median(ratings_list), 1)
 
-
-        
 
         # Convert the ratings count to a list of dictionaries
         ratings_list = [{'rating': rating, 'votes': count} for rating, count in ratings_dict.items()]

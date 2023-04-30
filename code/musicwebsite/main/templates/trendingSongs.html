@@ -15,7 +15,7 @@
             
             <div class="row">
                 <h1 id="trendingIn" class="pb-2">Trending Songs in The World</h1>
-                <a id="" class="my-auto ml-3 pb-2" href="https://open.spotify.com/playlist/37i9dQZEVXbMDoHDwVN2tF?si=aa665591baa647ca">Open in Spotify</a>
+                <a id="playlistLink" class="my-auto ml-3 pb-2" href="https://open.spotify.com/playlist/37i9dQZEVXbMDoHDwVN2tF?si=aa665591baa647ca">Open in Spotify</a>
             </div>
             <div class="row ml-2">
                 Select a Country
@@ -91,7 +91,7 @@ function handleCountrySelect(selectedValue) {
 
             } else {
                 $('#playlistLink').html('<a href="'+ tracks[0].playlist_url+ '">Open in Spotify</a>');
-                for (var i = 1; i < tracks.length; i++) {
+            for (var i = 1; i < tracks.length; i++) {
             var track = tracks[i];
 
             // Generate HTML for the track name, artist name, and cover image
